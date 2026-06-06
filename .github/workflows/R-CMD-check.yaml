@@ -11,7 +11,10 @@ jobs:
   R-CMD-check:
     runs-on: macos-latest
     env:
-      GRADEPATH_BACKEND: highs
+      # NOTE: do NOT set GRADEPATH_BACKEND here. It overrides the package's
+      # documented default backend (gurobi), which several tests assert and which
+      # the mocked gurobi-robust tests require; tests that need a real solver set
+      # their backend explicitly or skip when the solver is absent.
       R_KEEP_PKG_SOURCE: yes
       GITHUB_PAT: ${{ github.token }}
       # gurobi (a Suggests) is commercial and not installable on CI; allow the
