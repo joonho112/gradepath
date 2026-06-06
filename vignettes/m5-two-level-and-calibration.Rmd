@@ -1,0 +1,477 @@
+---
+title: "M5: Two-level industries and calibration"
+author: "JoonHo Lee"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+abstract: >
+  This is the last method-track vignette, and it has two parts. The first
+  extends the one-level grading to industries. The industry model splits each
+  firm's standardized effect into a within-industry component and a
+  between-industry component, deconvolves the two as a tensor-product prior,
+  and pushes that prior forward to the firm scale with gradepath's native
+  theta-pushforward. Two firms in the same industry share one between-industry
+  effect, so it cancels in their comparison and they are compared on the
+  within-industry component alone. The industry pipeline grades a firm-level
+  route and a between-industry route and assembles two report cards. We report
+  its status honestly as PARTIAL_ACCEPTED: the exact industry grade counts pass,
+  but the continuous discordance, agreement, and fit rows are classified by
+  fixture parity, not by direct reproduction of the paper's industry values, and
+  we read that ledger live. The second part covers gp_calibrate, the seeded
+  Monte-Carlo that checks the grading method's frequentist guarantees on a
+  fitted model, and explains why KRW's Table E1 study is deliberately deferred.
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_caption: true
+    df_print: tibble
+vignette: >
+  %\VignetteIndexEntry{M5: Two-level industries and calibration}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+{ p <- system.file("scripts/_setup.R", package = "gradepath"); if (!nzchar(p)) p <- "_setup.R"; source(p) }
+```
+
+This is the fifth and final method-track vignette. The first four built and
+verified the one-level pipeline end to end: `r vlink("m1-foundations-and-notation", "m1")`
+fixed the notation, `r vlink("m2-precision-and-standardization", "m2")` derived
+the precision exponent and the r-scale,
+`r vlink("m3-deconvolution-and-posterior", "m3")` built the prior, the
+posteriors, and the pairwise matrix $\Pi$, and
+`r vlink("m4-grading-frontier-and-report-cards", "m4")` turned $\Pi$ into grades
+along the information-reliability frontier. This vignette closes the track with
+two extensions that sit *around* that core rather than inside it.
+
+The first half is the **two-level industry model** — the same grading machinery,
+but applied to firms nested in industries, with a between-industry effect that
+every firm in an industry shares. The second half is **calibration** — a seeded
+Monte-Carlo, `gp_calibrate()`, that checks whether the grading method's
+frequentist guarantees survive estimating the prior. Both halves summarize the
+theory and cite Kline, Rose & Walters [@kline2024discrimination]; the formal
+two-level statements are in their Online Appendix and the Monte-Carlo design is
+their Table E1 study.
+
+Two disciplines run through the vignette. **Nothing solves here:** the two-level
+grade solve and `gp_calibrate()` each run an integer program (the calibration runs
+one *per draw*), so they appear only as `eval = FALSE` illustrations, and the one
+live panel reads the M2 acceptance ledger, a fast lookup. And the **honesty
+discipline** of the method track holds: the industry surface is reported exactly as
+`PARTIAL_ACCEPTED`, never inflated, and `gp_calibrate()` is named for what it is —
+a qualitative diagnostic, not a reproduction of any published number.
+
+# Part I — The two-level industry model
+
+## 1. From one level to two: why industries
+
+The one-level model of m1–m4 grades $n$ firms against one prior $G$ over a single
+latent quantity. KRW's industry analysis asks a structured question on top of
+that: *how much of a firm's measured discrimination is the firm, and how much is
+its industry?* A staffing firm and a bank may both post a wide White-minus-Black
+contact-rate gap, but if staffing as a whole runs wide while this particular bank
+is wide *for a bank*, those two firms are extreme for different reasons. The
+one-level model cannot see that distinction — it has one latent effect per firm
+and no notion of the group the firm sits in.
+
+The two-level model adds exactly that notion. It writes each firm's standardized
+effect as the combination of a **within-industry** component, specific to the
+firm, and a **between-industry** component, shared by every firm in the same
+industry. With the effect decomposed this way, gradepath can grade firms *within*
+the structure (the firm-level route) and grade the industries *themselves* (the
+between-industry route), producing two report cards instead of one. Everything
+downstream — the pairwise matrix, the grade integer program, the frontier — is
+the same machinery m4 already derived; only the prior and the posterior that feed
+it change. This is Milestone **M2**, deferred behind the one-level **M1** of the
+earlier vignettes, and the honesty section (§5) is about exactly how far that
+milestone got.
+
+## 2. The two-level model: within, between, and the pushforward
+
+We summarize the model; the full derivation is the package's design (its two-level
+derivation), and the formal statements are KRW [@kline2024discrimination]. Write
+$k(i)$ for the industry of firm $i$. The two-level decomposition of the firm's
+precision-independent effect $v_i$ has a **within-industry** component $\xi_i$
+(one per firm, drawn from a within-industry distribution $G_\xi$) and a
+**between-industry** component $\eta_{k(i)}$ (one per industry, drawn from a
+between-industry distribution $G_\eta$ and *shared* by every firm in industry
+$k$). For the race panel the two combine multiplicatively,
+
+$$
+v_i \;=\; \eta_{k(i)}\,\xi_i,
+\qquad
+\theta_i \;=\; s_i^{\beta}\,\eta_{k(i)}\,\xi_i,
+$$
+
+while for the gender panel they combine additively,
+$v_i = \eta_{k(i)} + \xi_i$, with $\theta_i = \mu + s_i^{\beta}(\eta_{k(i)} + \xi_i)$.
+The familiar $s_i^{\beta}$ rescaling — the precision dependence of
+`r vlink("m2-precision-and-standardization", "m2")` — is unchanged; what is new
+is the split of the latent effect into a firm part and an industry part.
+
+**The tensor-product prior.** The two components are deconvolved *jointly* into
+the tensor product
+
+$$
+G \;=\; G_\xi \otimes G_\eta,
+$$
+
+a two-dimensional distribution on the $(\xi, \eta)$ grid: $G_\xi$ on the
+within-industry support, $G_\eta$ on the between-industry support. gradepath fits
+both at once by a penalized log-spline maximum likelihood — the native two-level
+deconvolution, which reuses the one-level spline primitives but is not the
+one-level engine, since the joint fit, its cluster-robust GMM moments, and its
+support caps have no one-level analogue. A *within-share* constraint pins the
+between component to the multiplicative or additive identity — $E[\eta] = 1$ for
+race, $E[\eta] = 0$ for gender — so the industry layer carries only the shared
+*departure* from the average firm, and the within component carries the rest.
+
+**The theta-pushforward.** The prior lives on the $(\xi, \eta)$ scale, but the
+grading reads a prior on the firm $\theta$-scale. The bridge is an internal
+theta-pushforward step (gradepath's `gp_pushforward_theta`, an internal kernel
+mirroring KRW's `get_g_theta.m`; the two-level pipeline runs it for you): it
+marginalizes the joint prior over *both* supports, forming
+$\theta = s^{\beta}\,\xi\,\eta$ (race) or $\theta = \mu + s^{\beta}(\xi + \eta)$
+(gender) on a fixed grid and accumulating the joint mass $g_\xi \cdot g_\eta$ at
+each $\theta$ value. The one-level pushforward of m3 takes a single support and
+cannot do this — it has the wrong arity for two dimensions — so the two-level
+pushforward is a separate native kernel. The output is an ordinary
+$\theta$-scale prior, and from there the posterior, the pairwise matrix, and the
+grade integer program are exactly the m3–m4 objects.
+
+## 3. The same-industry override
+
+The single most consequential — and most error-prone — line in the two-level model
+is what happens when a pairwise comparison falls *within* an industry. The
+posterior compares two firms by integrating an ordering indicator against the
+firms' likelihood weights. When firm $i$ and firm $j$ sit in **different**
+industries, their industry effects $\eta_{k(i)}$ and $\eta_{k(j)}$ are
+independent draws, so the joint weight genuinely factorizes into the product of
+the two firms' likelihoods,
+
+$$
+L_{ij} \;=\; L_i \cdot L_j
+\qquad (k(i) \neq k(j)).
+$$
+
+When firm $i$ and firm $j$ sit in the **same** industry, they share the *one*
+between-industry effect $\eta_k$. The likelihood evidence for that shared effect
+has been observed once, not twice, so the joint weight must condition on the
+single $\eta_k$ and the likelihood enters **once**:
+
+$$
+L_{ij} \;=\; L_i \;\bigl(= L_j\bigr)
+\qquad (k(i) = k(j)).
+$$
+
+This is the **same-industry override**: within an industry the between-industry
+component is common to both firms, so it *cancels* in their comparison, and the
+within-industry component $\xi$ alone governs which firm is more extreme. Two banks
+both inherit whatever the banking industry's effect is, so that shared inheritance
+says nothing about which bank has the wider contact-rate gap — only their
+firm-specific $\xi$ does.
+
+Forming the product $L_i \cdot L_j = L_i^2$ for a same-industry pair would instead
+*square* the industry's evidence, double-counting the one shared $\eta_k$ as though
+it had been seen twice and biasing every within-industry comparison. The override
+is scoped strictly to the two-level case — in the one-level model there is no shared
+industry effect, and it must not fire — and it is social-choice plumbing in the
+pairwise construction, not an empirical-Bayes step, so it propagates to every
+pairwise matrix the two-level posterior produces.
+
+## 4. The two-level pipeline
+
+The industry analysis is three verbs, all of which need constructed two-level
+inputs and a solve, so they are **shown but not run** here. The pipeline mirrors
+the one-level path of m4 but carries two routes side by side: a firm-level route
+(`industry_rfe`) graded from the firm $\Pi_\theta$, and a between-industry route
+(`btwn`) graded from the industry-level $\Pi$ over the $\bar s\,\eta$ orderings.
+
+**Build the two-level pairwise matrices.** `gp_twolevel_pairwise()` takes the
+firm-level and between-industry pairwise inputs (with the same-industry override
+already encoded in their integrals) and bundles them for the two routes:
+
+```{r twolevel-pairwise, eval = FALSE}
+# Builds the two-level outranking bundle for the two routes.
+# Needs constructed two-level inputs -- shown, not run.
+pw <- gp_twolevel_pairwise(Pi_theta, Pi_bar,
+                           ids             = firm_ids,
+                           industry_levels = industry_ids,
+                           control         = gp_control(backend = "gurobi"))
+```
+
+**Solve the two-level grades.** `gp_twolevel_grade()` routes each bundle into the
+package grade solver — one grade path per route, read off at the reporting
+$\lambda$. It *solves*, so it is illustrative only:
+
+```{r twolevel-grade, eval = FALSE}
+# Solves one grade integer program per route -- shown, not run.
+tlg <- gp_twolevel_grade(pw,
+                         posterior = twolevel_posterior,  # backs the report cards
+                         lambda    = 0.25)                 # the reporting penalty
+```
+
+The returned `gp_twolevel_grade` carries an `industry_rfe` slot (the firm-level
+route: its grade path, selected grade, grade count, and — when a posterior is
+supplied — a firm report card) and a `btwn` slot (the same payload for the
+between-industry route), along with a combined `producer_status` that is `"OK"`
+only when *both* routes are acceptance-ready.
+
+**Select a report card.** `gp_twolevel_report_card()` returns the
+posterior-backed card for the chosen route:
+
+```{r twolevel-card, eval = FALSE}
+# The firm-level industry card, or the between-industry card -- shown, not run.
+firm_card <- gp_twolevel_report_card(tlg, model = "industry_rfe")
+ind_card  <- gp_twolevel_report_card(tlg, model = "btwn")
+```
+
+One scope note the next section makes precise: a report card exists only when the
+two-level grade was built *with* a posterior. While the industry surface is
+`PARTIAL_ACCEPTED`, the package exports no public builder for a posterior-backed
+two-level grade, so a grade assembled from bare $\Pi$ matrices is structural only
+and carries no card — calling the selector on it raises an informative error that
+points back to the status ledger. The verbs are documented and shown, but the
+success path runs on internal fixtures, not on user-constructed input; that
+deliberate boundary is itself part of the honest status.
+
+## 5. The honest M2 status: PARTIAL_ACCEPTED
+
+Here is the one live panel of the vignette, and the heart of the honesty story.
+The two-level milestone did *not* reach full acceptance, and the package says so
+in a structured ledger you can read instantly — no solve, just a lookup. The
+public summary is `gp_m2_status()`:
+
+```{r m2-status}
+gp_m2_status()[, c("component", "status", "detail")]
+```
+
+Read the six rows plainly. They tell a precise, un-inflated story:
+
+- **`formal` -> `PARTIAL_ACCEPTED`.** The overall verdict, with the reason
+  `"ONE_OR_MORE_L02_ROWS_REMAIN_APPROXIMATE"`. One or more continuous rows did not
+  clear the parity band, so the milestone is partial — not accepted, not failed.
+- **`L01_industry_grade_counts` -> `PASS`.** The exact part. The industry grade
+  **counts** are integer, optimizer-determined quantities, and they match the
+  archive exactly (`"2/2 exact count rows pass"`). This is a genuine,
+  registered, exact reproduction.
+- **`L02_race_continuous` -> `APPROXIMATE_OK`.** The race continuous summaries
+  (discordance, agreement, fit) remain *approximate*: the recorded $\Pi_\theta$
+  fixture gap is `0.0121756787`, above the `0.01` promotion threshold. The status
+  is honest — `APPROXIMATE_OK` means "documented as approximate," not "passed."
+- **`L02_gender_continuous` -> `PROMOTED`.** The gender continuous summaries were
+  *promoted to banded*: the recorded gender $\Pi_\theta$ fixture gap is
+  `0.0066335820`, at or below `0.01`. Promotion means the gender panel's fixture
+  artifacts met the intermediate parity band used for M2 — it does **not** mean
+  the paper's industry discordance, agreement, or fit targets were reproduced
+  directly. This is fixture-parity evidence, not paper-value reproduction.
+- **`N10_support_guards` -> `EVIDENCE_OK`.** Four synthetic support guards carry
+  evidence (`"4/4 N10 rows carry synthetic evidence status"`). These are guards
+  on the support construction, not registered paper-value passes.
+- **`M1_status_boundary` -> `NOT_RECALCULATED`.** The M2 ledger is M2-only. It
+  reads the two-level surface and deliberately does *not* touch or recompute the
+  one-level M1 acceptance contract.
+
+The honest reading, stated once and plainly: **M2 is `PARTIAL_ACCEPTED`.** The
+exact industry grade counts pass (L01). The continuous discordance, agreement,
+and fit rows are classified by *fixture parity* — gender promoted to banded at gap
+`0.0066`, race still approximate at gap `0.0122 > 0.01` — and a promotion is
+intermediate-band evidence, **not** direct reproduction of the paper's industry
+values. The N10 rows are synthetic support guards, not paper-value passes. A
+`PROMOTED` row is never the same as an `ACCEPTED` row, and the package never lets
+it read as one.
+
+The full ledger behind this one-screen summary is `gp_m2_acceptance()`, a
+`gp_m2_acceptance` object whose slots include `table` (the row-by-row gate ledger
+with paper and replicated values), `checks` (an alias of `table`),
+`effective_registry` (the registry after L02 promotion), `fixture_gates` (the
+race/gender fixture evidence used), and `summary` (the counts by status). The
+status verb above is the read; the acceptance object is the receipt.
+
+# Part II — Calibration
+
+## 6. The KRW Monte-Carlo study (Table E1)
+
+We now turn from the industry extension to a different kind of question:
+*does the grading method's statistical guarantee survive having to estimate the
+prior?* KRW answer it with an Online-Appendix Monte-Carlo study — **Table E1** —
+and gradepath ships a small stand-in for it. We summarize the study here and
+explain the stand-in next.
+
+Table E1 is a **calibration study, not a replication target.** Its logic,
+summarized:
+
+- **Known data-generating process, calibrated to the fit.** The estimated prior
+  $G$ and the precision-dependence exponent $\beta$ from the *real* deconvolution
+  are treated as the simulation's ground truth. Each draw samples firm-level
+  random effects from that prior, builds true effects $\theta_i = s_i^{\beta} v_i$
+  with the observed standard errors $s_i$ held fixed, and adds normal measurement
+  error $\hat\theta_i = \theta_i + s_i\,\varepsilon_i$.
+- **Oracle versus empirical.** Two grading rules run on every synthetic dataset.
+  The **oracle** uses the true prior that generated the data — it never has to
+  estimate anything. The **empirical** re-estimates the prior from the synthetic
+  draw through the same pipeline a researcher would actually run. The gap between
+  the two gradings is **regret**: the cost of not knowing the prior.
+- **What it certifies.** Small regret across draws means estimating the prior
+  barely distorts the grades — credible-interval coverage and discordance-rate
+  control hold up under prior-estimation uncertainty. This is a statement about
+  the *method's* frequentist properties, scoped to the race dimension.
+
+In gradepath's verification substrate these correspond to a block of Table-E1
+rows that sit in the published-value registry but are explicitly *outside* the
+package's headline scorecard. Only the rendered `tableE1.tex` ships; there is no
+machine-readable numeric artifact behind those rows. That fact drives the next
+section.
+
+## 7. Why Table E1 is deferred (GP-DEC-18-A)
+
+The deferral of Table E1 from the core replication suite is a deliberate, recorded
+design decision — **GP-DEC-18-A**. gradepath's harness checks replicated
+quantities against a registry of published values with per-id tolerances. The E1
+rows resist that machinery on three independent axes, each sufficient on its own:
+
+1. **No parseable artifact to check against.** The companion ships formatted
+   LaTeX (`tableE1.tex`) and nothing machine-readable behind it; the companion
+   itself excludes E1 from its own headline suite for exactly this reason. A
+   check that cannot read its own ground truth is not a check.
+2. **RNG parity is impossible by construction.** The study's posterior
+   integration draws from a $10^7$-sample Matlab stream seeded at `15238`.
+   gradepath replaces simulation with deterministic quadrature and cannot
+   reproduce that stream bit-for-bit, so any reproduction of E1 would be
+   approximate by construction — it could match the qualitative conclusion but
+   never the exact E1 cell to a tight band.
+3. **It validates the method, not a headline number gradepath must hit.** E1
+   certifies a *property* — that regret is small and that discordance-rate control
+   survives prior estimation — not a published number the package is obligated to
+   reproduce. Its cost-to-value for parity is low against the grade counts,
+   distributions, and discordance / agreement / fit scalars that *are* in the
+   headline suite.
+
+So the full Table E1 Monte-Carlo stays outside the core replication suite, and the
+package ships a smaller object that honors the *spirit* of E1 — confirming the
+method's guarantees hold — without pretending to a row-for-row fidelity it cannot
+deliver. Were E1 to be graduated into the suite some day, two artifacts not
+present today would be needed: a `tableE1.tex` parser that recovers its numeric
+cells into machine-readable truth, and a Monte-Carlo-aware tolerance class that
+compares against a simulation band rather than a point. Until both exist, E1 stays
+documented-but-not-checked, and the stand-in below stands in.
+
+## 8. The `gp_calibrate()` stand-in
+
+`gp_calibrate()` is that stand-in: a standalone, seeded, qualitative Monte-Carlo
+that runs on a *fitted* model. It treats the fitted prior as the truth, simulates
+`n_sim` synthetic datasets from it, re-runs the full one-level pipeline on each,
+and reports — as a compact `gp_calibration` object — whether the method's own
+frequentist guarantees hold qualitatively. The signature:
+
+```{r calibrate-usage, eval = FALSE}
+# Runs one grade-IP solve PER DRAW -- shown, not run. Never runs on render.
+fit <- gp_parity_fit("race")
+cal <- gp_calibrate(fit,
+                    n_sim     = 200L,    # synthetic datasets to draw and re-fit
+                    seed      = 15238L,  # in-package reproducibility only
+                    dr_target = 0.05,    # the discordance-rate target for dr_ok
+                    ci_level  = 0.9,     # the nominal interval level for coverage_ok
+                    min_ok    = 1L)      # minimum successful draws before reporting
+cal
+summary(cal)
+```
+
+The return `gp_calibration` carries the run scalars `dr_mean` (mean empirical
+discordance rate over successful draws), `coverage` (mean interval coverage), and
+`regret_mean` (mean regret of the empirical grading against the oracle), plus the
+two boolean verdicts `dr_ok` and `coverage_ok`. It prints as a compact,
+result-first one-liner and holds no posterior matrices and no per-draw archive.
+
+How to read the three quantities:
+
+- `dr_mean` near `dr_target` with `dr_ok = TRUE`: the rule's discordance-rate
+  control survives re-estimating the prior.
+- `coverage` near `ci_level` with `coverage_ok = TRUE`: credible intervals cover
+  the truth near nominal under prior-estimation uncertainty.
+- `regret_mean` small and non-negative: the empirical grading stays close to the
+  oracle that knows the true prior.
+
+**Two scale subtleties, stated plainly,** because they are what make the
+quantities mean what they say. First, the oracle grades the *known* true-prior
+pairwise **without re-deconvolving** — its pairwise comes straight from the true
+prior — and **both** gradings, oracle and empirical, are scored on that *same*
+true-prior pairwise. Because the oracle is by definition the risk-minimizer on
+that pairwise, the empirical grading can only match or fall short of it, so
+
+$$
+\text{regret} \;\ge\; 0 \qquad \text{by construction.}
+$$
+
+Regret is never negative; a regret of zero means the re-estimated prior reproduced
+the oracle grading exactly. Second, **coverage is assessed on the
+$\beta$-invariant $\theta$-scale**: the refit's $\theta$-scale reporting interval
+is compared against the true $\theta_i = s_i^{\beta} v_i$. Scoring on the
+$\theta$-scale keeps coverage coherent even when a refit's estimated $\beta$
+differs from the truth's, which it generally does.
+
+**Small-fit honesty.** The two verdicts are honest, not cosmetic. On a tiny or
+weakly identified fit the one-level $\beta$-GMM is noisy and its standardized scale
+is ill-identified, so the verdicts are frequently `FALSE` and many synthetic
+refits are skipped and counted in `n_failed` (the reported means are over the
+successful draws only; if too few succeed the harness errors rather than averaging
+noise). Meaningful calibration needs a well-identified fit — KRW's real multi-firm
+input. The harness is robust to the occasional non-convergent draw and reports
+honestly either way; it never tunes the data to force a pass.
+
+To keep the boundary sharp, `gp_calibrate()` deliberately is **not** seeded to
+match Matlab's `15238` stream (the shared default seed is a cosmetic homage;
+gradepath's RNG and its quadrature substitute mean the synthetic data differ from
+the study by construction), **not** the full multi-model, multi-hundred-draw grid
+of the study (it runs a small `n_sim` on the already-fitted model), and **not** a
+member of any default scorecard, headline result, or reproduction of any Table E1
+cell. It is a diagnostic. Because each draw re-solves a grade integer program, it
+**never runs on package load or on vignette render** — every calibration chunk
+here is `eval = FALSE` — and it prints a one-line budget heads-up before the loop
+when `n_sim` times the unit count exceeds 600, an informational message that never
+changes the result.
+
+## 9. Where to next
+
+That closes the method track. Over five vignettes the one-level pipeline was
+derived and verified end to end, the grading was extended to the two-level
+industry model and reported honestly as `PARTIAL_ACCEPTED`, and the method's
+frequentist guarantees were given a seeded stand-in for the deferred Table E1
+study. To revisit any stage:
+
+- **Foundations and notation** — `r vlink("m1-foundations-and-notation", "m1")`
+  fixes the symbol table, the grade-direction triple, and the firms-vs-names
+  welfare flip every later vignette relies on.
+- **Precision and standardization** —
+  `r vlink("m2-precision-and-standardization", "m2")` derives the r-scale and the
+  $\beta$-GMM step, the same precision dependence the two-level model carries.
+- **Deconvolution and posterior** —
+  `r vlink("m3-deconvolution-and-posterior", "m3")` builds the one-level prior,
+  the posteriors, and the pairwise matrix $\Pi$ this vignette extends to two
+  levels and re-uses under calibration.
+- **Grading, the frontier, and report cards** —
+  `r vlink("m4-grading-frontier-and-report-cards", "m4")` derives the grade
+  integer program and the frontier that both the two-level routes and each
+  calibration draw solve.
+
+For the workflow side, the applied track runs the same pipeline hands-on:
+`r vlink("a1-getting-started", "a1")` is the first contact,
+`r vlink("a2-the-grading-workflow", "a2")` walks the grading stage with race and
+gender side by side, `r vlink("a3-reading-and-exporting-results", "a3")` covers
+the report-card and frontier accessors, `r vlink("a4-figures", "a4")` is the
+figure gallery, and `r vlink("a5-solvers-and-calibration", "a5")` covers the
+solver backends and the calibration verbs in workflow terms. Throughout, the grade
+is a sorting by posterior evidence, never a contest: gradepath's printed output is
+result-first and quantity-anchored (the package decision `GP-DEC-14-A`), so the
+same code path serves firms and names — and the two-level routes and the
+calibration draws — without the printed text inverting on one of them. The grade
+label is an integer in $\{1, \dots, n\}$, a sorting index, not a letter grade.
+
+### Provenance
+
+```{r provenance}
+sessionInfo()
+```
+
+## References

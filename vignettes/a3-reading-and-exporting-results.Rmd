@@ -1,0 +1,362 @@
+---
+title: "A3: Reading and exporting results"
+author: "JoonHo Lee"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+abstract: >
+  A fitted gp_fit is a rich object: it carries the grades, the deconvolved
+  prior, the per-firm posterior, the pairwise outranking matrix, the assembled
+  report card, and the run-control that produced them. This vignette is the
+  reference for getting all of that out and into your own workflow. We read the
+  fit several ways for the console and the page (the result-first print box, the
+  fuller summary with its Interpretation and Glossary, the tidy ten-column data
+  frame, the six get_* accessors, and coef for a quick firm-to-grade lookup),
+  then export it three ways (a CSV you drop into a paper table, an RDS that
+  round-trips a gp_fit exactly, and an ASCII card you embed in a log via the
+  format_*_cli renderers). Everything runs on the bundled RACE fit, and nothing
+  here re-solves: every read is a fast lookup off a loaded object.
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_caption: true
+    df_print: tibble
+vignette: >
+  %\VignetteIndexEntry{A3: Reading and exporting results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+{ p <- system.file("scripts/_setup.R", package = "gradepath"); if (!nzchar(p)) p <- "_setup.R"; source(p) }
+```
+
+## 1. What a fit holds
+
+By the end of `r vlink("a2-the-grading-workflow", "A2")` you have a `gp_fit`: a
+single object that bundles everything the KRW pipeline produced
+[@kline2024discrimination] — the deconvolved prior, the per-firm posterior, the
+$J \times J$ pairwise outranking matrix, the selected grading, the assembled
+report card, and the run-control that drove the solve. This vignette is the
+reference for reading that object and exporting it, with each read pointed at a
+concrete downstream use: joining the card to firm covariates, dropping a block
+into a paper table, handing off a reproducible artifact, or pasting a
+result-first card into a build log.
+
+We load the proven RACE fit **once** and read everything below off it. Loading is
+instant because the fit ships pre-solved; **nothing in this vignette re-solves**.
+Every read is a fast lookup off materialized slots — the accessors never call the
+solver and recompute nothing.
+
+```{r load-fit}
+fit <- gp_parity_fit("race")
+```
+
+For the record, the one call that *produces* a fit in the first place is
+`krw_report_card()` — it solves the integer program and takes minutes, so it is
+shown here only as a pointer and never run:
+
+```{r how-produced, eval = FALSE}
+fit <- krw_report_card(
+  race, demographic = "race",
+  control = gp_control(backend = "gurobi", precision_rule = "krw_gmm",
+                       lambda_grid = c(0.25, 0.5, 1)))
+```
+
+## 2. The quick read: `print()` / the console box
+
+The fastest read is to print the fit. `print()` (which you get by typing `fit`
+alone) emits a result-first ASCII box — it leads with the answer, not the inputs:
+
+```{r print-fit}
+fit
+```
+
+Line by line, this is the headline you would quote in a slide or a commit
+message:
+
+- The header — `gp_fit . 97 units . grades: 3 (2/81/14) . selected lambda = 0.25`:
+  97 firms sorted into three grades, with 2 in the most-extreme grade, 81 in the
+  middle, and 14 in the least-extreme grade, at the KRW baseline $\lambda = 0.25$.
+- `reliability: (1 - DR)` — `0.96`: the share of comparable firm pairs on which
+  the grades agree with the underlying posterior ordering. Higher is cleaner.
+- `tau-bar` — `0.21`: the posterior expected Kendall rank agreement the grading
+  carries across grade boundaries (between-grade blocks), in [-1, 1]; higher
+  means the grades preserve more rank information.
+- `backend` — `gurobi`: the solver that produced the grading.
+
+A footer line points you onward — `summary()` for the full read,
+`get_report_card()` for the ranked table. Grade 1 is simply the most-extreme
+$\theta$ block under the data, not a verdict.
+
+## 3. The full read: `summary()`
+
+When you are writing up the result rather than glancing at it, `summary()` is the
+read you want. It keeps every number from the box and adds three plain-English
+blocks; it returns a typed `gp_fit_summary`, and printing it shows the full read:
+
+```{r summary-fit}
+summary(fit)
+```
+
+The three additions:
+
+- **Interpretation** — the headline in words you can lift into a methods
+  paragraph: the grades agree with the pairwise (posterior) ordering on about 96%
+  of comparable pairs, and grade 1 is the most-extreme grade, never a contest.
+- **Glossary** — each term defined in place: `reliability` $(1 - \text{DR})$,
+  `tau_bar`, and `selected_lambda`, so a reader who has never opened the package
+  can follow the output.
+- **Provenance** — the backend (`gurobi`) and the selection rule
+  (`baseline_lambda_0.25`), exactly what you cite to make the run reproducible.
+
+Use `print()` for a glance and `summary()` when you need the reading and the
+provenance on the page.
+
+## 4. The tidy table: `as.data.frame(fit)`
+
+For anything analytical — a join to firm covariates, a regression of grade on
+firm size, a plot in your own house style — coerce the fit to a data frame.
+`as.data.frame(fit)` returns the report-card rows as a tidy `97 × 10` table,
+ranked with the most-extreme firm (grade 1) on top and row names reset:
+
+```{r as-dataframe}
+head(as.data.frame(fit), 8)
+```
+
+The ten columns are the working surface for downstream use:
+
+- `id`, `label` — the firm identifier and its display label, your **join keys**
+  against any external firm table.
+- `grade` — the integer grade in $\{1, \dots, n\}$ (grade 1 is most extreme).
+- `sort_rank` — the rank used to order the rows; order on it, facet on `grade`.
+- `selected_lambda` — the penalty that produced this grading (`0.25`), carried on
+  every row so the table is self-documenting.
+- `posterior_mean`, `lower`, `upper` — the shrunken gap and its credible
+  interval, reported as-is and never recomputed downstream.
+- `estimate`, `se` — the raw gap and its standard error. Compare `estimate` with
+  `posterior_mean` to watch empirical Bayes work: the noisier a firm's estimate,
+  the harder its posterior is pulled toward the centre.
+
+Because it is an ordinary data frame, this is the object you `merge()`,
+`dplyr::left_join()`, or hand to `knitr::kable()` for a paper table. The
+report-card object coerces to the identical ten columns, so you can start from
+either end:
+
+```{r card-dataframe}
+identical(as.data.frame(get_report_card(fit)), as.data.frame(fit))
+```
+
+## 5. The accessors: the six `get_*` functions
+
+A `gp_fit` is read through its accessor family, never by reaching into `$` slots.
+Each accessor is a read-only lookup that recomputes nothing — reach for the one
+whose output your downstream step needs. There are six.
+
+**`get_grades(fit)`** — the selected grading as a named integer vector of length
+97, names equal to the firm ids. This is what you `cbind()` onto a firm table or
+pass to `table()` for the composition:
+
+```{r get-grades}
+head(get_grades(fit))
+table(get_grades(fit))      # the grade composition: 2 / 81 / 14
+```
+
+**`get_report_card(fit)`** — the assembled `gp_report_card` object, the source of
+the tidy table in section 4. Reach for it when you want the object that prints and
+plots, not just the rows:
+
+```{r get-report-card}
+get_report_card(fit)
+```
+
+**`get_posterior(fit)`** — the native `gp_posterior` (per-firm means, standard
+deviations, and intervals). Its data frame carries `estimate`, `se`, `id`,
+`label`, `posterior_mean`, `posterior_sd`, `lower`, `upper`, `scale`, and more;
+`estimate` versus `posterior_mean` is the shrinkage:
+
+```{r get-posterior}
+head(as.data.frame(get_posterior(fit))[, c("id", "estimate", "posterior_mean", "posterior_sd")])
+```
+
+**`get_prior(fit)`** — the deconvolved native `gp_prior`, a list carrying
+`support`, `density`, `mean`, `scale`, `diagnostics`, and `metadata`. The
+precision exponent $\beta$ — the number you cite to show the replication lands on
+the paper — lives in the metadata:
+
+```{r get-prior}
+names(get_prior(fit))
+round(get_prior(fit)$metadata$beta, 4)   # the precision exponent beta
+```
+
+gradepath lands on $\beta = 0.5095$, matching the `0.510` KRW report.
+
+**`get_pairwise(fit)`** — the `gp_pairwise` social-choice input the grading is
+solved over: the $J \times J$ matrix $\Pi_{ij} = \Pr(\theta_i > \theta_j)$ in
+`$matrix`, with the firm order in `$ids`:
+
+```{r get-pairwise}
+pw <- get_pairwise(fit)
+pw$matrix[1:5, 1:5]         # a corner of the J x J outranking matrix
+head(pw$ids)
+```
+
+An entry near $1$ says the posterior strongly orders that row's firm above the
+column's; an entry near $0.5$ says the data cannot separate them. The matrix
+encodes pairwise posterior order only and carries no superiority statement.
+
+**`get_control(fit)`** — the exact `gp_control()` that produced the fit, your
+reproducibility receipt: the grid, the backend, the precision rule, the interval
+level, the solver options, the seed, the schema version, and the provenance:
+
+```{r get-control}
+ctrl <- get_control(fit)
+names(ctrl)
+c(backend = ctrl$backend, precision_rule = ctrl$precision_rule)
+```
+
+## 6. `coef()`: a firm → grade lookup
+
+`coef()` is the base generic an R user reaches for first, so a `gp_fit` answers it
+with the grading: `coef(fit)` returns the same named integer vector as
+`get_grades(fit)` — names = firm ids, values = the assigned grade — surfaced under
+the name your muscle memory already knows:
+
+```{r coef}
+identical(coef(fit), get_grades(fit))
+head(coef(fit))                 # e.g. krw_race_001 = 2
+coef(fit)["krw_race_001"]       # the grade of one firm, by id
+```
+
+Because it is named, it doubles as a quick firm-to-grade lookup table: index it by
+id to read any one firm's grade, or `data.frame(id = names(coef(fit)), grade =
+coef(fit))` to spread the whole vector into two columns for a join. When you simply
+need "which firm got which grade" without the posterior summaries, this is the
+lightest read in the package; a grade label carries no ranking-superiority
+statement.
+
+## 7. The CLI renderers: embed a card in a log
+
+`print()` and `summary()` write to the console, but sometimes you want the same
+result-first card as a *character vector* you can splice into a build log, a
+plain-text report, or an HTML `<pre>` block. The `format_*_cli` renderers are
+exactly that: the formatter behind the console output, returned as one string per
+line.
+
+`format_gp_fit_cli(fit)` returns the box of section 2 as lines you `cat()` or
+`writeLines()`:
+
+```{r format-fit-cli}
+writeLines(format_gp_fit_cli(fit))
+```
+
+`format_gp_report_card_cli()` does the same for the ranked card: it leads with the
+unit count, grade composition, and selected $\lambda$, shows a HEAD of the ranked
+table, and closes with the welfare footnote:
+
+```{r format-card-cli}
+writeLines(format_gp_report_card_cli(get_report_card(fit)))
+```
+
+Because each returns plain ASCII as a character vector, both compose with
+everything that takes text — dropping a result-first card into a pipeline log is a
+one-liner, `message(paste(format_gp_fit_cli(fit), collapse = "\n"))`, so a
+teammate reading the log sees the grading without opening R. The renderer's
+welfare note describes grade 1 as the most-extreme $\theta$ and is not hard-coded
+to one reading: it adapts between the firms application (most discriminatory) and
+the names application (best-treated), so the same code is honest for either.
+
+## 8. Exporting
+
+Three exports cover almost every hand-off.
+
+**CSV.** The first is the analytical artifact: write the tidy table to CSV and it
+lands in a spreadsheet, a paper table, or a co-author's pipeline. This is the
+command you would run on your own machine (we do not write into the package
+working directory here):
+
+```{r export-csv, eval = FALSE}
+write.csv(as.data.frame(fit), "report_card_race.csv", row.names = FALSE)
+```
+
+**RDS round-trip.** The second is the reproducible artifact: the whole `gp_fit`,
+saved with `saveRDS()`, round-trips **exactly** — every slot, the prior, the
+posterior, the pairwise matrix, and the control come back identical. We
+demonstrate it live through a `tempfile()`, so the chunk both runs and proves the
+integrity:
+
+```{r export-rds}
+path <- tempfile(fileext = ".rds")
+saveRDS(fit, path)
+identical(fit, readRDS(path))   # a gp_fit round-trips through RDS exactly
+```
+
+A `TRUE` here is the guarantee you rely on when you ship a solved fit alongside a
+paper: a collaborator who `readRDS()`s the file recovers the identical object you
+solved, with no re-solve and no drift. (This is precisely how the bundled parity
+fits travel inside the package.)
+
+**ASCII card to a file.** The third is the human-readable artifact: the
+result-first card written to a text file, ready to attach to an issue or paste
+into a README. Like the CSV, this is the command you would run yourself:
+
+```{r export-card-txt, eval = FALSE}
+writeLines(format_gp_report_card_cli(get_report_card(fit)), "card.txt")
+```
+
+## 9. The same reads for gender
+
+Every read and export above is demographic-agnostic — the accessors, `coef()`, the
+renderers, and the export idioms do not know or care which gap they describe. The
+bundled gender fit answers every call of sections 2–8 identically, only with its
+own numbers:
+
+```{r gender}
+gfit <- gp_parity_fit("gender")
+table(get_grades(gfit))                     # the gender composition: 1 / 3 / 89 / 4
+round(get_prior(gfit)$metadata$beta, 4)     # the gender precision exponent (1.2554)
+head(coef(gfit))
+```
+
+The gender fit sorts the 97 firms into four grades (`1 / 3 / 89 / 4`), and its
+precision exponent is $\beta = 1.2554$ — a different number from the race fit's
+$0.5095$, as it should be, since the two demographics carry different gap series.
+Its `summary()`, `as.data.frame(gfit)`, the six `get_*` accessors, the
+`format_*_cli` renderers, and the CSV / RDS export all behave exactly as above:
+`as.data.frame(gfit)` is the same ten columns, `coef(gfit)` is the same named
+lookup, and `saveRDS(gfit, ...)` round-trips with the same `identical()`
+guarantee. The welfare reading of grade 1 follows the application and is never
+hard-coded to one interpretation.
+
+## 10. Where to next
+
+- **Getting started** — `r vlink("a1-getting-started", "A1")` is the gentle first
+  contact, if you arrived here without a fit in hand;
+  `r vlink("a2-the-grading-workflow", "A2")` walks the seven stages that fill the
+  slots this vignette reads.
+- **Figures** — `r vlink("a4-figures", "A4")` is the cookbook for all four KRW
+  signature figures (frontier, posterior contrast, report card, discordance),
+  built from these same accessors.
+- **Solvers and calibration** — `r vlink("a5-solvers-and-calibration", "A5")`
+  covers the open-source backends and the calibration harness.
+- **Foundations** — `vignette("m1-foundations-and-notation")` formalizes the
+  estimate → rank → grade pipeline, and the method track
+  (`vignette("m2-precision-and-standardization")`,
+  `vignette("m3-deconvolution-and-posterior")`,
+  `vignette("m4-grading-frontier-and-report-cards")`,
+  `vignette("m5-two-level-and-calibration")`) derives each stage whose output you
+  read here.
+
+A closing reminder on reading the output honestly: a grade is a sorting of firms
+by posterior evidence, never a contest, and grade 1 is the most-extreme grade
+rather than a judgment. The one-level race and gender core is accepted within its
+declared scope, and the numbers here match the paper ($\beta = 0.5095$ versus the
+reported `0.510`; $\lambda = 0.25$ is the KRW baseline).
+
+### Provenance
+
+```{r provenance}
+sessionInfo()
+```
+
+## References

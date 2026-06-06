@@ -1,0 +1,182 @@
+url: https://joonho112.github.io/gradepath
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#1F6F8B"        # the Option 2 (frontier) hex-sticker accent (deep teal)
+
+home:
+  title: "gradepath: Discrimination Report Cards via a Native Kline-Rose-Walters Core"
+  description: >
+    Replicate the Kline, Rose & Walters (2024) discrimination report card in R:
+    beta-GMM precision, deconvolution, the grade integer program, the
+    information-reliability frontier, and report cards.
+
+authors:
+  JoonHo Lee:
+    href: https://github.com/joonho112
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Vignettes
+      menu:
+      - text: Applied track
+      - text: "A1 · Getting started"
+        href: articles/a1-getting-started.html
+      - text: "A2 · The grading workflow"
+        href: articles/a2-the-grading-workflow.html
+      - text: "A3 · Reading and exporting results"
+        href: articles/a3-reading-and-exporting-results.html
+      - text: "A4 · The figure cookbook"
+        href: articles/a4-figures.html
+      - text: "A5 · Solvers and calibration"
+        href: articles/a5-solvers-and-calibration.html
+      - text: Methodological track
+      - text: "M1 · Foundations and notation"
+        href: articles/m1-foundations-and-notation.html
+      - text: "M2 · Precision and standardization"
+        href: articles/m2-precision-and-standardization.html
+      - text: "M3 · Deconvolution and posterior"
+        href: articles/m3-deconvolution-and-posterior.html
+      - text: "M4 · Grading, the frontier, and report cards"
+        href: articles/m4-grading-frontier-and-report-cards.html
+      - text: "M5 · Two-level industries and calibration"
+        href: articles/m5-two-level-and-calibration.html
+
+articles:
+- title: Applied track
+  navbar: ~
+  desc: >
+    Workflow-oriented guides: install, run the pipeline, read and export results,
+    make the figures, and operate the solver. Light on math.
+  contents:
+  - a1-getting-started
+  - a2-the-grading-workflow
+  - a3-reading-and-exporting-results
+  - a4-figures
+  - a5-solvers-and-calibration
+- title: Methodological track
+  navbar: ~
+  desc: >
+    The mathematics behind the functions: notation, the precision GMM,
+    deconvolution and the posterior, the grade program and frontier, and the
+    two-level / calibration layer. Each displayed equation is checked in code.
+  contents:
+  - m1-foundations-and-notation
+  - m2-precision-and-standardization
+  - m3-deconvolution-and-posterior
+  - m4-grading-frontier-and-report-cards
+  - m5-two-level-and-calibration
+
+reference:
+- title: Complete pipeline
+  desc: >
+    One-call entry points that run the full Kline-Rose-Walters recipe, plus the
+    run-settings constructor. (`gradepath()` is an alias of `krw_report_card()`.)
+  contents:
+  - krw_report_card
+  - gp_control
+
+- title: The grade engine
+  desc: Solve the grade integer program, trace the grade path, select a grade, and preview a run.
+  contents:
+  - gp_grade
+  - gp_grade_path
+  - gp_select_grade
+  - gp_preview
+
+- title: Pairwise outranking
+  desc: Posterior pairwise outranking probabilities between units.
+  contents:
+  - gp_pairwise
+
+- title: Frontier & reliability
+  desc: The information-reliability frontier and the R-squared reliability measures.
+  contents:
+  - gp_frontier
+  - gp_r2
+  - gp_krw_r2
+
+- title: Report cards
+  desc: Assemble the discrimination report card from a fit.
+  contents:
+  - gp_report_card
+
+- title: Plotting
+  desc: The four signature ggplot2 figures, the theme, the grade palette, and autoplot methods.
+  contents:
+  - gp_plot_frontier
+  - gp_plot_posterior_contrast
+  - gp_plot_report_card
+  - gp_plot_discordance
+  - theme_gradepath
+  - scale_color_gradepath
+  - autoplot.gp_frontier
+  - autoplot.gp_report_card
+
+- title: Calibration
+  desc: Seeded Monte Carlo harness for calibration and regret diagnostics.
+  contents:
+  - gp_calibrate
+
+- title: Two-level / industry (M2)
+  desc: The two-level industry layer -- pairwise, grading, acceptance, and the promotion registry.
+  contents:
+  - gp_twolevel_pairwise
+  - gp_twolevel_grade
+  - gp_twolevel_report_card
+  - gp_m2_acceptance
+  - gp_m2_promoted_registry
+  - gp_m2_status
+
+- title: Accessors
+  desc: Typed accessors that pull components out of a fitted object.
+  contents:
+  - get_grades
+  - get_report_card
+  - get_pairwise
+  - get_posterior
+  - get_prior
+  - get_control
+
+- title: Replication harness
+  desc: Run the bundled replication, check it, and validate published targets.
+  contents:
+  - gp_check
+  - gp_run_all
+  - gp_validate_targets
+
+- title: Console formatters (CLI)
+  desc: Opt-in cli-decorated formatters that render rich console output.
+  contents:
+  - format_gp_fit_cli
+  - format_gp_frontier_cli
+  - format_gp_grade_fit_cli
+  - format_gp_grade_path_cli
+  - format_gp_pairwise_cli
+  - format_gp_report_card_cli
+
+- title: S3 methods
+  desc: Print, summary, coef, and data-frame coercion for gradepath classes.
+  contents:
+  - print.gp_calibration
+  - print.gp_summary
+  - summary.gp_calibration
+  - coef.gp_fit
+  - as.data.frame.gp_fit
+
+- title: Datasets
+  desc: Bundled datasets used throughout the replication.
+  contents:
+  - krw_firms
+  - gp_registry
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

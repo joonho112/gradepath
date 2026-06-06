@@ -1,0 +1,40 @@
+# --- R session / project ---
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# --- build / check artifacts ---
+*.tar.gz
+*.tgz
+*.Rcheck/
+..Rcheck/
+/doc/
+/Meta/
+inst/doc/
+
+# --- pkgdown site ---
+# The pre-built site under docs/ IS committed (a static snapshot). The
+# pkgdown.yaml workflow also rebuilds and deploys it on push, so the two stay
+# in sync. (docs/ is excluded from the package tarball via .Rbuildignore.)
+
+# --- solver / run logs ---
+gurobi.log
+inst/scripts/*.log
+Rplots.pdf
+tests/testthat/Rplots.pdf
+
+# --- OS / editors ---
+.DS_Store
+*/.DS_Store
+*~
+.vscode/
+.idea/
+
+# --- stray ---
+=
+
+# NOTE: the development log directory `log/` is intentionally NOT ignored here
+# so the build/review history can be kept in-repo. Add `log/` below if you would
+# rather keep the public repo lean (the site + package do not depend on it).

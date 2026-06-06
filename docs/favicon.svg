@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="692.8" viewBox="0 0 600 692.8"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+    <clipPath id="hex">
+      <polygon points="300,0 600,173.2 600,519.6 300,692.8 0,519.6 0,173.2"></polygon>
+    </clipPath>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"></stop>
+      <stop offset="1" stop-color="#EAF1F4"></stop>
+    </linearGradient>
+  </defs><g clip-path="url(#hex)">
+    <rect x="0" y="0" width="600" height="692.8" fill="url(#bg)"></rect>
+
+    <!-- bold concave Pareto frontier spanning the hex -->
+    <path d="M 120 478 C 245 300 430 205 495 205" fill="none" stroke="#2C3E50" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <!-- exactly THREE large graded points ON the curve (low -> high: yellow, teal, purple) -->
+    <g stroke="#FFFFFF" stroke-width="4">
+      <circle cx="159.1" cy="427.1" r="46" fill="#FDE725"></circle>
+      <circle cx="330.0" cy="274.8" r="46" fill="#21908C"></circle>
+      <circle cx="477.2" cy="206.8" r="46" fill="#440154"></circle>
+    </g>
+  </g><polygon points="300,0 600,173.2 600,519.6 300,692.8 0,519.6 0,173.2" fill="none" stroke="#1F6F8B" stroke-width="16" stroke-linejoin="round"></polygon></svg>

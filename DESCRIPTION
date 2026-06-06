@@ -1,0 +1,74 @@
+Package: gradepath
+Type: Package
+Title: Discrimination Report Cards via a Native Kline-Rose-Walters Core
+Version: 0.5.0
+Authors@R:
+    person("JoonHo", "Lee", email = "jlee296@ua.edu",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0009-0006-4019-8703"))
+Description: Replicates the discrimination-report-card analysis of Kline,
+    Rose, and Walters (2024) <doi:10.1257/aer.20230700>, "A Discrimination
+    Report Card", entirely in R. A single package replaces the original
+    multi-language pipeline ('Stata', R, 'Python', 'MATLAB', and 'Gurobi'),
+    reproducing the estimation core natively: beta-GMM precision
+    standardization, empirical-Bayes prior deconvolution and posterior
+    shrinkage, the pairwise outranking matrix, the Bayes-risk grade integer
+    program, and the information-reliability frontier. The grade program is
+    solved with 'Gurobi' by default or the open 'HiGHS' backend, so the
+    workflow runs without commercial solver access. Outputs include discrete
+    integer-grade report cards, the four signature figures of the paper, and a
+    Monte Carlo calibration check. Low-level empirical-Bayes primitives are
+    supplied through the 'ebrecipe' package behind a controlled seam, as an
+    input container and one-level cross-check rather than a stage orchestrator.
+    This is a pre-release: the one-level race and gender core (M1) is accepted
+    under a predeclared scoped policy, recovering the published grade
+    distributions as proven-optimal solves, while the two-level industry
+    surface (M2) is partially accepted, with exact industry grade counts
+    reproduced and some continuous rows resting on fixture-parity evidence
+    rather than direct reproduction. Applied researchers can run, audit, and
+    extend the KRW analysis with standard R tooling.
+URL: https://github.com/joonho112/gradepath,
+    https://joonho112.github.io/gradepath/
+BugReports: https://github.com/joonho112/gradepath/issues
+License: MIT + file LICENSE
+Depends:
+    R (>= 4.1)
+Imports:
+    digest,
+    ebrecipe (>= 0.5.0),
+    ggplot2,
+    grDevices,
+    rlang,
+    scales,
+    stats,
+    utils
+Suggests:
+    gurobi,
+    ROI,
+    ROI.plugin.glpk,
+    ROI.plugin.symphony,
+    callr,
+    ggrepel,
+    highs,
+    jsonlite,
+    Matrix,
+    slam,
+    testthat (>= 3.0.0),
+    vdiffr,
+    knitr,
+    rmarkdown
+SystemRequirements: Grade-integer-program phases use Gurobi (>= 10.0)
+    for the default replication backend (Gurobi license; gurobi_cl on
+    PATH) or explicit open backends: the direct highs package for HiGHS and
+    ROI plugins for GLPK/SYMPHONY. The package installs, loads, and tests
+    without a solver license.
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Config/testthat/edition: 3
+Config/Needs/website: pkgdown
+Remotes:
+    joonho112/ebrecipe

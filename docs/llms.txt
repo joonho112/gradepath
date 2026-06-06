@@ -1,0 +1,480 @@
+# gradepath
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![R-CMD-check](https://github.com/joonho112/gradepath/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/joonho112/gradepath/actions/workflows/R-CMD-check.yaml)
+
+Firm-level estimates of discrimination are noisy, and the noise differs
+sharply across firms: some firms are measured from thousands of
+applications and others from a handful, so a raw ranking mostly sorts on
+sampling error. **gradepath** sorts firms by what the data actually
+support — pooling information across firms to shrink the noise, ordering
+them by posterior evidence, and assigning each one a discrete integer
+grade with an honest credible interval. It is a native-R replication of
+the discrimination-report-card analysis of Kline, Rose, and Walters
+(2024, *AER*), replacing the original Stata + R + Python + MATLAB +
+Gurobi pipeline with a single package.
+
+## The method in three steps
+
+1.  **Estimate.** Standardize each firm’s discrimination estimate onto a
+    common precision scale with a beta-GMM precision rule, so a firm
+    measured from few applications is not mistaken for a confident
+    outlier.
+2.  **Rank.** Deconvolve the underlying prior across firms via empirical
+    Bayes, shrink each firm’s estimate toward it, then build a pairwise
+    posterior outranking matrix that records, for every pair, the
+    probability that one firm is more discriminatory than the other.
+3.  **Grade.** Solve a Bayes-risk integer program that turns those
+    posterior comparisons into a small set of discrete grades, choosing
+    how fine to grade by moving along an information-reliability
+    frontier.
+
+No equations here — see the **Method** vignettes (M1–M5) for the full
+notation and derivation.
+
+## Installation
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("joonho112/gradepath")
+# or clone:  gh repo clone joonho112/gradepath
+```
+
+The grade integer program solves with **Gurobi by default** (the
+recommended backend; it needs a Gurobi license and `gurobi_cl` on your
+`PATH`) or falls back to the open, license-free **HiGHS** backend
+(several times slower on a real 97-firm solve). The package installs,
+loads, and passes its tests **without any solver** — you only need a
+backend when you run a live grade solve yourself.
+
+## A five-minute example
+
+Conceptually, the whole pipeline is a **single call**. The grade step
+solves an integer program over all 97 firms (~3 min with Gurobi), so we
+do **not** run it inline here:
+
+``` r
+
+# Read the bundled per-firm beta-GMM series (97 firms; col 2 = theta_hat, col 3 = s).
+gmm  <- read.csv(system.file("extdata/krw-gmm-input/theta_estimates_matlab_race.csv",
+                             package = "gradepath"), header = FALSE)
+race <- list(theta_hat = gmm[[2]], s = gmm[[3]])
+
+# The whole pipeline is one call. The grade step solves an integer program over
+# 97 firms (~3 min with Gurobi), so we do not run it inline here:
+fit <- krw_report_card(race, demographic = "race",
+                       control = gp_control(backend = "gurobi",
+                                            precision_rule = "krw_gmm",
+                                            lambda_grid = c(0.25, 0.5, 1)))
+```
+
+So that this page knits instantly and without a solver, **gradepath**
+ships the proven race result. Load it (no solve) and print it:
+
+``` r
+
+library(gradepath)
+# gradepath ships the proven RACE result; load it instantly (no solve):
+fit <- readRDS(system.file("extdata/cached/fit_race_parity.rds", package = "gradepath"))
+fit
+#> +------------------------------------------------------------------------+
+#> | gp_fit  .  97 units  .  grades: 3 (2/81/14)  .  selected lambda = 0.25 |
+#> +------------------------------------------------------------------------+
+#> | units      : 97                                                        |
+#> | grades     : 3 (2/81/14)                                               |
+#> | reliability: (1 - DR) = 0.96   tau-bar = 0.21                          |
+#> | backend    : gurobi                                                    |
+#> +------------------------------------------------------------------------+
+#> i  summary(fit) for backend/selection details; get_report_card(fit) for the ranked table.
+```
+
+Then draw the report card for those 97 firms:
+
+``` r
+
+gp_plot_report_card(get_report_card(fit))
+```
+
+![A gradepath discrimination report card: 97 firms sorted by posterior
+evidence into three integer grades along the information-reliability
+frontier, each firm shown with a posterior point and a credible
+interval.](reference/figures/README-report-card-1.png)
+
+Reading the output: across **97 units**, the analysis lands on **3
+integer grades** holding 2, 81, and 14 firms, at the KRW baseline
+`lambda = 0.25`. The reliability summary `(1 - DR) = 0.96` says the
+grading reproduces the underlying posterior ordering with high fidelity,
+`tau-bar = 0.21` summarizes the average spread within a grade, and the
+solve used the `gurobi` backend. Grade **1** is simply the most-extreme
+grade — an integer label in `1..n`, here the two firms the data place
+farthest along the discrimination scale — not a verdict about any firm;
+the grades are a sorting by posterior evidence, and the credible
+intervals tell you how firmly each placement is supported.
+
+## Key features
+
+- **Native-R replication** of the full Kline-Rose-Walters estimation
+  core — beta-GMM precision standardization, empirical-Bayes
+  deconvolution and shrinkage, the pairwise outranking matrix, the
+  Bayes-risk grade integer program, and the information-reliability
+  frontier — with no Stata, Python, MATLAB, or hand-offs between
+  languages.
+- **Gurobi by default**, with the open **HiGHS** backend so the workflow
+  runs without a commercial license.
+- **The four signature KRW figures** as composable `ggplot2` verbs
+  (frontier, posterior contrast, report card, discordance).
+- **Discrete integer-grade report cards** with per-firm posterior
+  credible intervals.
+- **A Monte-Carlo calibration harness** for checking that the grades are
+  well-calibrated.
+- **A two-level industry surface** for grading industries as well as
+  firms.
+
+## Vignettes
+
+**Applied track** — run, read, and export:
+
+| Article | Title |
+|----|----|
+| [a1-getting-started](https://joonho112.github.io/gradepath/articles/a1-getting-started.html) | A1: Getting started — your first discrimination report card |
+| [a2-the-grading-workflow](https://joonho112.github.io/gradepath/articles/a2-the-grading-workflow.html) | A2: The grading workflow — from estimates to a report card |
+| [a3-reading-and-exporting-results](https://joonho112.github.io/gradepath/articles/a3-reading-and-exporting-results.html) | A3: Reading and exporting results |
+| [a4-figures](https://joonho112.github.io/gradepath/articles/a4-figures.html) | A4: The figure cookbook |
+| [a5-solvers-and-calibration](https://joonho112.github.io/gradepath/articles/a5-solvers-and-calibration.html) | A5: Solvers and calibration |
+
+**Method track** — the derivation behind each step:
+
+| Article | Title |
+|----|----|
+| [m1-foundations-and-notation](https://joonho112.github.io/gradepath/articles/m1-foundations-and-notation.html) | M1: Foundations and notation |
+| [m2-precision-and-standardization](https://joonho112.github.io/gradepath/articles/m2-precision-and-standardization.html) | M2: Precision and standardization |
+| [m3-deconvolution-and-posterior](https://joonho112.github.io/gradepath/articles/m3-deconvolution-and-posterior.html) | M3: Deconvolution and posterior |
+| [m4-grading-frontier-and-report-cards](https://joonho112.github.io/gradepath/articles/m4-grading-frontier-and-report-cards.html) | M4: Grading, the frontier, and report cards |
+| [m5-two-level-and-calibration](https://joonho112.github.io/gradepath/articles/m5-two-level-and-calibration.html) | M5: Two-level industries and calibration |
+
+## Status and performance notes
+
+This is a **pre-release** (v0.5.0, lifecycle *experimental*). The
+scoping below is exact — please read it before relying on results.
+
+- The one-level **race and gender core (M1) is accepted under a
+  predeclared scoped policy.** It recovers the published grade
+  distributions (race 2 / 81 / 14, gender 1 / 3 / 89 / 4) as
+  **proven-optimal** solves (`mip_gap = 0`) at the KRW baseline
+  `lambda = 0.25`, with `beta = 0.5095` (race) and `beta = 1.2554`
+  (gender) matching the paper.
+- The **two-level industry surface (M2) is partially accepted**: exact
+  industry grade counts are reproduced; some continuous rows rest on
+  fixture-parity evidence rather than direct reproduction.
+- **Performance.** The 97-firm grade integer program takes ~3 min with
+  Gurobi; HiGHS is license-free but several times slower. No example in
+  this README runs a live solve — the headline numbers load the bundled
+  proven fit.
+
+## Citation
+
+To cite gradepath, cite both the package and the method it replicates:
+
+``` R
+@Manual{gradepath,
+  title  = {gradepath: Discrimination Report Cards via a Native Kline-Rose-Walters Core},
+  author = {JoonHo Lee},
+  year   = {2026},
+  note   = {R package version 0.5.0},
+  url    = {https://joonho112.github.io/gradepath/},
+}
+
+@Article{kline2024discrimination,
+  title   = {A Discrimination Report Card},
+  author  = {Patrick Kline and Evan K. Rose and Christopher R. Walters},
+  journal = {American Economic Review},
+  year    = {2024},
+  volume  = {114},
+  number  = {8},
+  pages   = {2472--2525},
+  doi     = {10.1257/aer.20230700},
+}
+```
+
+## Related work
+
+- [**ebrecipe**](https://github.com/joonho112/ebrecipe) supplies the
+  low-level empirical-Bayes primitives (prior deconvolution and
+  posterior shrinkage) that gradepath builds on behind a controlled seam
+  — as an input container plus a one-level cross-check, not a stage
+  orchestrator.
+- [**drrank**](https://github.com/ekrose/drrank) is the original
+  authors’ reference implementation of the grade-optimization step for
+  *A Discrimination Report Card*; gradepath reproduces that step
+  natively in R rather than calling out to it.
+
+## Getting help
+
+Found a problem, or have a question? Please open an issue at
+<https://github.com/joonho112/gradepath/issues>.
+
+## License
+
+MIT © JoonHo Lee. See
+[`LICENSE.md`](https://joonho112.github.io/gradepath/LICENSE.md).
+
+Created and maintained by **JoonHo Lee** ([ORCID
+0009-0006-4019-8703](https://orcid.org/0009-0006-4019-8703)), Assistant
+Professor, The University of Alabama (<jlee296@ua.edu>).
+
+# Package index
+
+## Complete pipeline
+
+One-call entry points that run the full Kline-Rose-Walters recipe, plus
+the run-settings constructor.
+([`gradepath()`](https://joonho112.github.io/gradepath/reference/krw_report_card.md)
+is an alias of
+[`krw_report_card()`](https://joonho112.github.io/gradepath/reference/krw_report_card.md).)
+
+- [`krw_report_card()`](https://joonho112.github.io/gradepath/reference/krw_report_card.md)
+  [`gradepath()`](https://joonho112.github.io/gradepath/reference/krw_report_card.md)
+  : Run the one-level KRW report-card pipeline in a single call
+- [`gp_control()`](https://joonho112.github.io/gradepath/reference/gp_control.md)
+  : Create a gradepath run-control object
+
+## The grade engine
+
+Solve the grade integer program, trace the grade path, select a grade,
+and preview a run.
+
+- [`gp_grade()`](https://joonho112.github.io/gradepath/reference/gp_grade.md)
+  : Solve a single-penalty grade fit
+- [`gp_grade_path()`](https://joonho112.github.io/gradepath/reference/gp_grade_path.md)
+  : Solve the grade path over a lambda grid
+- [`gp_select_grade()`](https://joonho112.github.io/gradepath/reference/gp_select_grade.md)
+  : Select a stored grade fit from a solved grade path
+- [`gp_preview()`](https://joonho112.github.io/gradepath/reference/gp_preview.md)
+  : Preview a gradepath run without solving
+
+## Pairwise outranking
+
+Posterior pairwise outranking probabilities between units.
+
+- [`gp_pairwise()`](https://joonho112.github.io/gradepath/reference/gp_pairwise.md)
+  : Pairwise outranking probability matrix
+
+## Frontier & reliability
+
+The information-reliability frontier and the R-squared reliability
+measures.
+
+- [`gp_frontier()`](https://joonho112.github.io/gradepath/reference/gp_frontier.md)
+  : Summarize the frontier of a solved grade path
+- [`gp_r2()`](https://joonho112.github.io/gradepath/reference/gp_r2.md)
+  : Grade-level share of bias-corrected estimate variance
+- [`gp_krw_r2()`](https://joonho112.github.io/gradepath/reference/gp_krw_r2.md)
+  : KRW grade R-squared from the rsquared.do recipe
+
+## Report cards
+
+Assemble the discrimination report card from a fit.
+
+- [`gp_report_card()`](https://joonho112.github.io/gradepath/reference/gp_report_card.md)
+  : Assemble a unit-level report card
+
+## Plotting
+
+The four signature ggplot2 figures, the theme, the grade palette, and
+autoplot methods.
+
+- [`gp_plot_frontier()`](https://joonho112.github.io/gradepath/reference/gp_plot_frontier.md)
+  : Plot the KRW information-reliability frontier
+- [`gp_plot_posterior_contrast()`](https://joonho112.github.io/gradepath/reference/gp_plot_posterior_contrast.md)
+  : Plot the grade-sorted posterior-contrast heatmap
+- [`gp_plot_report_card()`](https://joonho112.github.io/gradepath/reference/gp_plot_report_card.md)
+  : Plot the KRW report card (horizontal point-and-interval)
+- [`gp_plot_discordance()`](https://joonho112.github.io/gradepath/reference/gp_plot_discordance.md)
+  : Plot the KRW conditional-discordance heatmap (lower triangle)
+- [`theme_gradepath()`](https://joonho112.github.io/gradepath/reference/theme_gradepath.md)
+  : gradepath ggplot2 theme (KRW house style)
+- [`scale_color_gradepath()`](https://joonho112.github.io/gradepath/reference/scale_color_gradepath.md)
+  [`scale_colour_gradepath()`](https://joonho112.github.io/gradepath/reference/scale_color_gradepath.md)
+  [`scale_fill_gradepath()`](https://joonho112.github.io/gradepath/reference/scale_color_gradepath.md)
+  : gradepath ordinal grade colour and fill scales
+- [`autoplot(`*`<gp_frontier>`*`)`](https://joonho112.github.io/gradepath/reference/autoplot.gp_frontier.md)
+  [`autoplot(`*`<gp_fit>`*`)`](https://joonho112.github.io/gradepath/reference/autoplot.gp_frontier.md)
+  [`autoplot(`*`<gp_grade_path>`*`)`](https://joonho112.github.io/gradepath/reference/autoplot.gp_frontier.md)
+  : Autoplot methods for gradepath frontier objects
+- [`autoplot(`*`<gp_report_card>`*`)`](https://joonho112.github.io/gradepath/reference/autoplot.gp_report_card.md)
+  : Autoplot method for a gradepath report card
+
+## Calibration
+
+Seeded Monte Carlo harness for calibration and regret diagnostics.
+
+- [`gp_calibrate()`](https://joonho112.github.io/gradepath/reference/gp_calibrate.md)
+  : Seeded Monte-Carlo calibration of the one-level KRW grading method
+
+## Two-level / industry (M2)
+
+The two-level industry layer – pairwise, grading, acceptance, and the
+promotion registry.
+
+- [`gp_twolevel_pairwise()`](https://joonho112.github.io/gradepath/reference/gp_twolevel_pairwise.md)
+  : Wrap two-level Pi matrices as solver-ready pairwise objects
+- [`gp_twolevel_grade()`](https://joonho112.github.io/gradepath/reference/gp_twolevel_grade.md)
+  : Grade two-level industry matrices
+- [`gp_twolevel_report_card()`](https://joonho112.github.io/gradepath/reference/gp_twolevel_report_card.md)
+  : Return a two-level industry report card
+- [`gp_m2_acceptance()`](https://joonho112.github.io/gradepath/reference/gp_m2_acceptance.md)
+  : Build the M2 acceptance scorecard
+- [`gp_m2_promoted_registry()`](https://joonho112.github.io/gradepath/reference/gp_m2_promoted_registry.md)
+  : Effective M2 registry after fixture-gate promotion
+- [`gp_m2_status()`](https://joonho112.github.io/gradepath/reference/gp_m2_status.md)
+  : Summarize the M2 acceptance status
+
+## Accessors
+
+Typed accessors that pull components out of a fitted object.
+
+- [`get_grades()`](https://joonho112.github.io/gradepath/reference/get_grades.md)
+  : Extract per-unit grades from a gradepath fit
+- [`get_report_card()`](https://joonho112.github.io/gradepath/reference/get_report_card.md)
+  : Extract the report card from a gradepath fit
+- [`get_pairwise()`](https://joonho112.github.io/gradepath/reference/get_pairwise.md)
+  : Extract the pairwise outranking object from a gradepath fit
+- [`get_posterior()`](https://joonho112.github.io/gradepath/reference/get_posterior.md)
+  : Extract the native posterior from a gradepath fit
+- [`get_prior()`](https://joonho112.github.io/gradepath/reference/get_prior.md)
+  : Extract the native prior from a gradepath fit
+- [`get_control()`](https://joonho112.github.io/gradepath/reference/get_control.md)
+  : Extract the run-control object from a gradepath fit
+
+## Replication harness
+
+Run the bundled replication, check it, and validate published targets.
+
+- [`gp_check()`](https://joonho112.github.io/gradepath/reference/gp_check.md)
+  : Compare a replicated value against the gradepath registry
+- [`gp_run_all()`](https://joonho112.github.io/gradepath/reference/gp_run_all.md)
+  : Run a registry-driven gradepath scorecard
+- [`gp_validate_targets()`](https://joonho112.github.io/gradepath/reference/gp_validate_targets.md)
+  : Validate replicated target values against the gradepath registry
+
+## Console formatters (CLI)
+
+Opt-in cli-decorated formatters that render rich console output.
+
+- [`format_gp_fit_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_fit_cli.md)
+  [`summary(`*`<gp_fit>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_fit_cli.md)
+  [`print(`*`<gp_fit>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_fit_cli.md)
+  :
+
+  Format a `gp_fit` for the console
+
+- [`format_gp_frontier_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_frontier_cli.md)
+  [`summary(`*`<gp_frontier>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_frontier_cli.md)
+  [`print(`*`<gp_frontier>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_frontier_cli.md)
+  :
+
+  Format a `gp_frontier` for the console
+
+- [`format_gp_grade_fit_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_grade_fit_cli.md)
+  [`summary(`*`<gp_grade_fit>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_grade_fit_cli.md)
+  [`print(`*`<gp_grade_fit>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_grade_fit_cli.md)
+  :
+
+  Format a `gp_grade_fit` for the console
+
+- [`format_gp_grade_path_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_grade_path_cli.md)
+  [`summary(`*`<gp_grade_path>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_grade_path_cli.md)
+  [`print(`*`<gp_grade_path>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_grade_path_cli.md)
+  :
+
+  Format a `gp_grade_path` for the console
+
+- [`format_gp_pairwise_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_pairwise_cli.md)
+  [`summary(`*`<gp_pairwise>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_pairwise_cli.md)
+  [`print(`*`<gp_pairwise>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_pairwise_cli.md)
+  :
+
+  Format a `gp_pairwise` for the console
+
+- [`format_gp_report_card_cli()`](https://joonho112.github.io/gradepath/reference/format_gp_report_card_cli.md)
+  [`summary(`*`<gp_report_card>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_report_card_cli.md)
+  [`print(`*`<gp_report_card>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_report_card_cli.md)
+  [`as.data.frame(`*`<gp_report_card>`*`)`](https://joonho112.github.io/gradepath/reference/format_gp_report_card_cli.md)
+  :
+
+  Format a `gp_report_card` for the console
+
+## S3 methods
+
+Print, summary, coef, and data-frame coercion for gradepath classes.
+
+- [`print(`*`<gp_calibration>`*`)`](https://joonho112.github.io/gradepath/reference/print.gp_calibration.md)
+  :
+
+  Print a `gp_calibration` – a compact, result-first one-liner
+
+- [`print(`*`<gp_summary>`*`)`](https://joonho112.github.io/gradepath/reference/print.gp_summary.md)
+  :
+
+  Print a `gp_summary`
+
+- [`summary(`*`<gp_calibration>`*`)`](https://joonho112.github.io/gradepath/reference/summary.gp_calibration.md)
+  :
+
+  Summarize a `gp_calibration` (typed one-row data frame)
+
+- [`coef(`*`<gp_fit>`*`)`](https://joonho112.github.io/gradepath/reference/coef.gp_fit.md)
+  : Grade vector from a gradepath fit (base-generic synonym for
+  get_grades)
+
+- [`as.data.frame(`*`<gp_fit>`*`)`](https://joonho112.github.io/gradepath/reference/as.data.frame.gp_fit.md)
+  : Report-card table from a gradepath fit as a data frame
+
+## Datasets
+
+Bundled datasets used throughout the replication.
+
+- [`krw_firms`](https://joonho112.github.io/gradepath/reference/krw_firms.md)
+  : KRW (2024) firm-level callback-discrimination estimates
+- [`gp_registry`](https://joonho112.github.io/gradepath/reference/gp_registry.md)
+  : gradepath replication registry (curated KRW paper-value targets)
+
+# Articles
+
+### Applied track
+
+Workflow-oriented guides: install, run the pipeline, read and export
+results, make the figures, and operate the solver. Light on math.
+
+- [A1: Getting started — your first discrimination report
+  card](https://joonho112.github.io/gradepath/articles/a1-getting-started.md):
+- [A2: The grading workflow — from estimates to a report
+  card](https://joonho112.github.io/gradepath/articles/a2-the-grading-workflow.md):
+- [A3: Reading and exporting
+  results](https://joonho112.github.io/gradepath/articles/a3-reading-and-exporting-results.md):
+- [A4: The figure
+  cookbook](https://joonho112.github.io/gradepath/articles/a4-figures.md):
+- [A5: Solvers and
+  calibration](https://joonho112.github.io/gradepath/articles/a5-solvers-and-calibration.md):
+
+### Methodological track
+
+The mathematics behind the functions: notation, the precision GMM,
+deconvolution and the posterior, the grade program and frontier, and the
+two-level / calibration layer. Each displayed equation is checked in
+code.
+
+- [M1: Foundations and
+  notation](https://joonho112.github.io/gradepath/articles/m1-foundations-and-notation.md):
+- [M2: Precision and
+  standardization](https://joonho112.github.io/gradepath/articles/m2-precision-and-standardization.md):
+- [M3: Deconvolution and
+  posterior](https://joonho112.github.io/gradepath/articles/m3-deconvolution-and-posterior.md):
+- [M4: Grading, the frontier, and report
+  cards](https://joonho112.github.io/gradepath/articles/m4-grading-frontier-and-report-cards.md):
+- [M5: Two-level industries and
+  calibration](https://joonho112.github.io/gradepath/articles/m5-two-level-and-calibration.md):

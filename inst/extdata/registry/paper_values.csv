@@ -1,0 +1,298 @@
+id,exhibit,quantity,paper_value,unit,tolerance,paper_locator,likely_artifact,source_status,confidence,notes
+scale_n_firms_graded,Abstract,Number of US employers graded (estimation sample),97,count,0,"Abstract: ""grade the race and gender contact gaps of 97 US employers""",tables/reporting_statistics.txt,confirmed_main_text,high,Final sample after excluding 11 firms
+scale_n_firms_frame,Section I,Firms in disclosed sampling frame,108,count,0,"Sec I: ""1,000 job applications to each of 108 firms""",tables/reporting_statistics.txt,confirmed_main_text,high,Frame before dropping 11 unreliable firms
+scale_apps_per_firm_cap,Section I,Max applications sent per firm,1000,count,0,"Sec I: ""up to 1,000 job applications""",unknown,confirmed_main_text,high,Design cap
+scale_jobs_per_firm,Section I,Entry-level vacancies sampled per employer,125,count,0,"Sec I: ""125 entry-level job vacancies""",unknown,confirmed_main_text,high,Design target
+scale_n_waves,Section I,Number of sampling waves,5,count,0,"Sec I: ""a series of five waves""",unknown,confirmed_main_text,high,Oct 2019-Apr 2021
+scale_jobs_per_wave,Section I,Target jobs per firm per wave,25,count,0,"Sec I: ""target of 25 jobs""",unknown,confirmed_main_text,high,Design target
+scale_firms_all_waves,Section I,Firms sampled in all waves,72,count,0,"Sec I: ""majority of firms (72)""",unknown,confirmed_main_text,high,Rest missed waves (COVID)
+scale_pairs_per_job,Section I,Application pairs per job,4,count,0,"Sec I: ""four pairs of applications""",unknown,confirmed_main_text,high,Each pair Black+White
+scale_apps_per_job_max,Section I,Max applications per job,8,count,0,"Sec I: ""fewer than 8 total applications""",unknown,confirmed_main_text,high,4 pairs x 2
+scale_apps_total_frame,Section I,Total applications (full frame; approx),84000,count,1000,"Sec I: ""roughly 84,000 applications""",tables/reporting_statistics.txt,confirmed_main_text,high,Approximate; NOT 83643
+scale_jobs_total_frame,Section I,Total jobs (full frame; approx),11000,count,1000,"Sec I: ""11,000 jobs at 108 firms""",tables/reporting_statistics.txt,confirmed_main_text,high,Approximate
+scale_contact_window,Section I,Contact window (days),30,count,0,"Sec I: ""within 30 days""",unknown,confirmed_main_text,high,Outcome definition
+scale_bm_names_per_group,Section I,Bertrand-Mullainathan names per group,9,count,0,"Sec I: ""nine unique names for each ... group""",unknown,confirmed_main_text,high,Source set
+scale_nc_names_per_group,Section I,Added NC-ticket names per group,10,count,0,"Sec I: ""ten additional names per group""",unknown,confirmed_main_text,high,
+scale_race_threshold,Section I,Race-distinctiveness threshold,90,percent,1,"Sec I: ""more than 90 percent""",unknown,confirmed_main_text,high,Name selection rule
+scale_lastname_minfreq,Section I,Minimum national frequency for last names,10000,count,0,"Sec I: ""at least 10,000 times nationally""",unknown,confirmed_main_text,high,2010 Census surnames
+scale_n_names,Section IV,Total first names ranked,76,count,0,"Sec IV: ""utilized 76 first names""",dump/npmle_supp_names.csv,confirmed_main_text,high,19 per group
+scale_names_per_group,Table 1,First names per race x sex group,19,count,0,Table 1 col (3) each cell,tables/table1.csv,confirmed_main_text,high,76/4
+scale_n_groups,Section IV,Number of demographic groups G,4,count,0,"Sec IV fn7: ""G=4""",unknown,confirmed_main_text,high,Variance formula
+t1_bm_contact,Table 1,Contact rate Black male names,0.233,proportion,0.001,Table 1 Male/Black col (1),tables/table1.csv,confirmed_main_text,high,SE 0.003; wave-reweighted
+t1_bm_contact_se,Table 1,SE Black male contact rate,0.003,sd,0.001,Table 1 Male/Black col (1),tables/table1.csv,confirmed_main_text,high,
+t1_bm_apps,Table 1,Applications Black male names,20927,count,0,Table 1 Male/Black col (2),tables/table1.csv,confirmed_main_text,high,
+t1_bm_wald,Table 1,Wald heterogeneity stat Black male,12.6,other,0.1,Table 1 Male/Black col (4),tables/table1.csv,confirmed_main_text,high,chi2(18)
+t1_bm_wald_p,Table 1,Wald p-value Black male,0.82,pvalue,0.01,Table 1 Male/Black col (4) brackets,tables/table1.csv,confirmed_main_text,high,
+t1_wm_contact,Table 1,Contact rate White male names,0.246,proportion,0.001,Table 1 Male/White col (1),tables/table1.csv,confirmed_main_text,high,SE 0.003
+t1_wm_apps,Table 1,Applications White male names,20975,count,0,Table 1 Male/White col (2),tables/table1.csv,confirmed_main_text,high,
+t1_wm_wald,Table 1,Wald stat White male,15.8,other,0.1,Table 1 Male/White col (4),tables/table1.csv,confirmed_main_text,high,
+t1_wm_wald_p,Table 1,Wald p-value White male,0.61,pvalue,0.01,Table 1 Male/White col (4),tables/table1.csv,confirmed_main_text,high,
+t1_bf_contact,Table 1,Contact rate Black female names,0.226,proportion,0.001,Table 1 Female/Black col (1),tables/table1.csv,confirmed_main_text,high,SE 0.003; lowest cell
+t1_bf_apps,Table 1,Applications Black female names,20879,count,0,Table 1 Female/Black col (2),tables/table1.csv,confirmed_main_text,high,
+t1_bf_wald,Table 1,Wald stat Black female,21.2,other,0.1,Table 1 Female/Black col (4),tables/table1.csv,confirmed_main_text,high,
+t1_bf_wald_p,Table 1,Wald p-value Black female,0.24,pvalue,0.01,Table 1 Female/Black col (4),tables/table1.csv,confirmed_main_text,high,Min p across cells
+t1_wf_contact,Table 1,Contact rate White female names,0.254,proportion,0.001,Table 1 Female/White col (1),tables/table1.csv,confirmed_main_text,high,SE 0.003; highest cell
+t1_wf_apps,Table 1,Applications White female names,20862,count,0,Table 1 Female/White col (2),tables/table1.csv,confirmed_main_text,high,
+t1_wf_wald,Table 1,Wald stat White female,19.9,other,0.1,Table 1 Female/White col (4),tables/table1.csv,confirmed_main_text,high,
+t1_wf_wald_p,Table 1,Wald p-value White female,0.34,pvalue,0.01,Table 1 Female/White col (4),tables/table1.csv,confirmed_main_text,high,
+t1_sd_total,Table 1,Bias-corrected total SD of name contact rates,0.010,sd,0.001,Table 1 'Total' row,tables/table1.csv,confirmed_main_text,high,Variance=(0.010)^2 per fn7
+t1_sd_between,Table 1,Bias-corrected between race/sex SD,0.011,sd,0.001,Table 1 'Between race/sex' row,tables/table1.csv,confirmed_main_text,high,~equals total
+t1_wald_df,Table 1,Wald test degrees of freedom,18,count,0,Table 1 notes,tables/table1.csv,confirmed_main_text,high,19 names - 1
+names_npmle_mass1,Section IV.A,NPMLE low mass point (contact prob),0.226,proportion,0.001,"Sec IV.A: ""mass points at p_i=0.226""",dump/npmle_supp_names.csv,confirmed_main_text,high,Probability scale
+names_npmle_mass2,Section IV.A,NPMLE high mass point,0.244,proportion,0.002,"Sec IV.A: ""and p_i=0.244""",dump/npmle_supp_names.csv,confirmed_main_text,high,
+names_npmle_mass3,Section IV.A,NPMLE third mass point,0.260,proportion,0.005,"Sec IV.A: ""third mass point at p_i=0.260""",dump/npmle_supp_names.csv,confirmed_main_text,high,
+names_npmle_gap,Section IV.A,Gap between two main NPMLE mass points,1.8,percent,0.1,"Sec IV.A: ""1.8 percentage point gap""",dump/npmle_supp_names.csv,confirmed_main_text,high,= 0.244-0.226
+names_bw_gap,Section IV.A,Black-White contact gap in experiment (names),2.1,percent,0.1,"Sec IV.A: ""contact gap ... of 2.1 percentage points""",tables/reporting_statistics.txt,confirmed_main_text,high,percentage points
+names_lnN_pval,Section IV.A,p-value regression theta on ln N_i,0.17,pvalue,0.01,"Sec IV.A: ""(p=0.17)""",unknown,confirmed_main_text,high,Independence check
+names_se_corr,Section IV.A,Corr of delta-method SE with (4N)^-0.5,0.98,correlation,0.01,"fn9: ""correlation = .98""",unknown,confirmed_main_text,high,VST check
+names_tau_l1,Section IV.B,Expected rank corr tau-bar at lambda=1 (names),0.44,correlation,0.01,"Sec IV.B: ""approaches 0.44""",dump/ranking_names.csv,confirmed_main_text,high,Condorcet
+names_dr_l1,Section IV.B,Discordance rate at lambda=1 (names),0.28,proportion,0.01,"Sec IV.B: ""discordance rate of 0.28""",dump/ranking_names.csv,confirmed_main_text,high,
+names_elbow_lambda,Section IV.B,Lambda of DR elbow (names),0.18,other,0.01,"Sec IV.B: ""elbow ... around lambda=0.18""",dump/ranking_names.csv,confirmed_main_text,high,Below: 1 grade
+names_ngrades_l025,Section IV.B,Number of grades at lambda=0.25 (names),2,count,0,"Sec IV.B: ""yields two grades""",dump/ranking_names.csv,confirmed_main_text,high,
+names_dr_l025,Section IV.B,Discordance rate at lambda=0.25 (names),0.07,proportion,0.01,"Sec IV.B: ""reliable (DR=0.07)""",dump/ranking_names.csv,confirmed_main_text,high,2-grade solution
+names_tau_l025,Section IV.B,Expected tau-bar at lambda=0.25 (names),0.29,correlation,0.01,"Sec IV.B: ""informative (tau=0.29)""",dump/ranking_names.csv,confirmed_main_text,high,2-grade solution
+names_lambda_3grade,Section IV.B,Lambda giving 3 grades (names),0.41,other,0.01,"Sec IV.B: ""lambda=0.41 ... three grades""",dump/ranking_names.csv,confirmed_main_text,high,70% threshold
+names_tau_3grade,Section IV.B,Expected tau-bar with 3 grades (names),0.32,correlation,0.01,"Sec IV.B: ""(to tau=0.32)""",dump/ranking_names.csv,confirmed_main_text,high,+11% vs 0.29
+names_threshold_l025,Section IV.B,Posterior certainty threshold at lambda=0.25,80,percent,1,"Sec IV.B: ""less than 80 percent""",unknown,confirmed_main_text,high,1/(1+0.25)
+names_ci_count,Section IV.C,Expected name CIs covering truth,72,count,0,"Sec IV.C: ""Approximately 72 ... of these 76""",dump/ranking_names.csv,confirmed_main_text,high,95% of 76
+names_top38_black,Section IV.C,Distinctively Black names in top 38,8,count,0,"Sec IV.C: ""only 8 are distinctively Black""",dump/ranking_names.csv,confirmed_main_text,high,Headline
+names_top38_male,Section IV.C,Distinctively male names in top 38,19,count,0,"Sec IV.C: ""19 of the top 38 ... male""",dump/ranking_names.csv,confirmed_main_text,high,Sex not recovered
+names_between_grade_sd,Section IV.C,Name-weighted between-grade SD of p_i,0.006,sd,0.001,"Sec IV.C: ""between grade standard deviation ... 0.006""",dump/ranking_names.csv,confirmed_main_text,high,
+names_marginal_sd,Section IV.C,Marginal SD of p_i across names,0.010,sd,0.001,"Sec IV.C: ""roughly 0.010""",dump/ranking_names.csv,confirmed_main_text,high,
+names_grade_r2,Section IV.C,R-squared of latent p_i on grades,35,percent,1,"Sec IV.C: ""R^2 of 35 percent""",dump/ranking_names.csv,confirmed_main_text,high,(0.006/0.010)^2
+names_topgrade_n,Section IV.C,Names in top grade (2-grade soln),53,count,0,"Sec IV.C: ""35 of the 53 names""",dump/ranking_names.csv,confirmed_main_text,high,
+names_topgrade_white,Section IV.C,White names in top grade,35,count,0,"Sec IV.C: ""35 of the 53""",dump/ranking_names.csv,confirmed_main_text,high,66%
+names_2ndgrade_n,Section IV.C,Names in second grade,23,count,0,"Sec IV.C: ""3 of the 23 names""",dump/ranking_names.csv,confirmed_main_text,high,53+23=76
+names_2ndgrade_white,Section IV.C,White names in second grade,3,count,0,"Sec IV.C: ""3 of the 23""",dump/ranking_names.csv,confirmed_main_text,high,13%
+names_pseudor2_sex_4g,Section IV.C,Pseudo-R2 sex 4-grade,0.012,other,0.001,"Sec IV.C: ""pseudo-R^2 for sex of 0.012""",unknown,confirmed_main_text,high,McFadden
+names_pseudor2_sex_5g,Section IV.C,Pseudo-R2 sex 5-grade,0.034,other,0.001,"Sec IV.C: ""pseudo-R^2 for sex of 0.034""",unknown,confirmed_main_text,high,
+names_pseudor2_race_4g,Section IV.C,Pseudo-R2 race 4-grade,0.28,other,0.01,"Sec IV.C: ""0.28 and 0.23""",unknown,confirmed_main_text,high,
+names_pseudor2_race_5g,Section IV.C,Pseudo-R2 race 5-grade,0.23,other,0.01,"Sec IV.C: ""0.28 and 0.23""",unknown,confirmed_main_text,high,
+t2_white_contact,Table 2,Firm-avg White contact rate,0.256,proportion,0.001,Table 2 Race White,tables/table2.csv,confirmed_main_text,high,SE 0.004
+t2_white_contact_se,Table 2,SE White contact rate,0.004,sd,0.001,Table 2 Race White,tables/table2.csv,confirmed_main_text,high,
+t2_black_contact,Table 2,Firm-avg Black contact rate,0.236,proportion,0.001,Table 2 Race Black,tables/table2.csv,confirmed_main_text,high,SE 0.003
+t2_black_contact_se,Table 2,SE Black contact rate,0.003,sd,0.001,Table 2 Race Black,tables/table2.csv,confirmed_main_text,high,
+t2_race_diff,Table 2,Race contact-rate difference (W-B),0.020,proportion,0.001,Table 2 race Difference,tables/table2.csv,confirmed_main_text,high,SE 0.002
+t2_race_diff_se,Table 2,SE race difference,0.002,sd,0.001,Table 2 race Difference,tables/table2.csv,confirmed_main_text,high,
+t2_race_logdiff,Table 2,Race log contact-rate difference,0.095,log_diff,0.001,Table 2 race Log difference,tables/table2.csv,confirmed_main_text,high,SE 0.013; = mean theta
+t2_race_logdiff_se,Table 2,SE race log difference,0.013,sd,0.001,Table 2 race Log difference,tables/table2.csv,confirmed_main_text,high,
+t2_male_contact,Table 2,Firm-avg Male contact rate,0.244,proportion,0.001,Table 2 Gender Male,tables/table2.csv,confirmed_main_text,high,SE 0.004
+t2_female_contact,Table 2,Firm-avg Female contact rate,0.248,proportion,0.001,Table 2 Gender Female,tables/table2.csv,confirmed_main_text,high,SE 0.004
+t2_gender_diff,Table 2,Gender contact-rate difference (M-F),-0.003,proportion,0.001,Table 2 gender Difference,tables/table2.csv,confirmed_main_text,high,SE 0.003
+t2_gender_logdiff,Table 2,Gender log contact-rate difference,-0.006,log_diff,0.001,Table 2 gender Log difference,tables/table2.csv,confirmed_main_text,high,SE 0.020
+t2_gender_logdiff_se,Table 2,SE gender log difference,0.020,sd,0.001,Table 2 gender Log difference,tables/table2.csv,confirmed_main_text,high,
+t2_n_firms,Table 2,Number of firms (estimation sample),97,count,0,Table 2 'Number of firms',tables/table2.csv,confirmed_main_text,high,
+t2_n_jobs,Table 2,Number of jobs (estimation sample),10453,count,0,Table 2 'Number of jobs',tables/table2.csv,confirmed_main_text,high,
+t2_n_apps,Table 2,Number of applications (estimation sample),78910,count,0,Table 2 'Number of apps',tables/table2.csv,confirmed_main_text,high,Differs from ~84k frame
+t3_race_ni_beta,Table 3 col1,GMM beta race no-industry,0.510,other,0.001,Table 3 (1) beta,tables/table3.csv,confirmed_main_text,high,SE 0.190
+t3_race_ni_beta_se,Table 3 col1,SE beta race no-industry,0.190,sd,0.001,Table 3 (1) beta,tables/table3.csv,confirmed_main_text,high,
+t3_race_ni_mu,Table 3 col1,GMM mu race no-industry,0.308,other,0.001,Table 3 (1) mu,tables/table3.csv,confirmed_main_text,high,SE 0.147
+t3_race_ni_sigmav,Table 3 col1,GMM sigma_v race no-industry,0.207,sd,0.001,Table 3 (1) sigma_v,tables/table3.csv,confirmed_main_text,high,SE 0.106
+t3_race_ni_J,Table 3 col1,GMM J-stat race no-industry,0.101,other,0.001,Table 3 (1) J-stat,tables/table3.csv,confirmed_main_text,high,df=1; p=0.97
+t3_race_wi_beta,Table 3 col2,GMM beta race with-industry,0.522,other,0.001,Table 3 (2) beta,tables/table3.csv,confirmed_main_text,high,SE 0.150
+t3_race_wi_mu,Table 3 col2,GMM mu race with-industry,0.320,other,0.001,Table 3 (2) mu,tables/table3.csv,confirmed_main_text,high,SE 0.096
+t3_race_wi_sigmaeta,Table 3 col2,GMM sigma_eta race with-industry,0.528,sd,0.001,Table 3 (2) sigma_eta,tables/table3.csv,confirmed_main_text,high,SE 0.120; between-industry
+t3_race_wi_sigmaxi,Table 3 col2,GMM sigma_xi race with-industry,0.113,sd,0.001,Table 3 (2) sigma_xi,tables/table3.csv,confirmed_main_text,high,SE 0.054; within-industry
+t3_race_wi_J,Table 3 col2,GMM J-stat race with-industry,0.087,other,0.001,Table 3 (2) J-stat,tables/table3.csv,confirmed_main_text,high,df=2; p=0.95
+t3_gender_ni_beta,Table 3 col3,GMM beta gender no-industry,1.255,other,0.001,Table 3 (3) beta,tables/table3.csv,confirmed_main_text,high,SE 0.242
+t3_gender_ni_mu,Table 3 col3,GMM mu gender no-industry,-0.009,other,0.001,Table 3 (3) mu,tables/table3.csv,confirmed_main_text,high,SE 0.015
+t3_gender_ni_sigmav,Table 3 col3,GMM sigma_v gender no-industry,1.234,sd,0.001,Table 3 (3) sigma_v,tables/table3.csv,confirmed_main_text,high,SE 0.561
+t3_gender_ni_J,Table 3 col3,GMM J-stat gender no-industry,0.011,other,0.001,Table 3 (3) J-stat,tables/table3.csv,confirmed_main_text,high,df=1
+t3_gender_wi_beta,Table 3 col4,GMM beta gender with-industry,1.114,other,0.001,Table 3 (4) beta,tables/table3.csv,confirmed_main_text,high,SE 0.204
+t3_gender_wi_mu,Table 3 col4,GMM mu gender with-industry,0.000,other,0.001,Table 3 (4) mu,tables/table3.csv,confirmed_main_text,high,SE 0.017
+t3_gender_wi_sigmaeta,Table 3 col4,GMM sigma_eta gender with-industry,0.569,sd,0.001,Table 3 (4) sigma_eta,tables/table3.csv,confirmed_main_text,high,SE 0.191
+t3_gender_wi_sigmaxi,Table 3 col4,GMM sigma_xi gender with-industry,0.645,sd,0.001,Table 3 (4) sigma_xi,tables/table3.csv,confirmed_main_text,high,SE 0.213
+t3_gender_wi_J,Table 3 col4,GMM J-stat gender with-industry,1.280,other,0.001,Table 3 (4) J-stat,tables/table3.csv,confirmed_main_text,high,df=2
+t3b_race_ni_mean,Table 3 Panel B,Implied mean theta race no-industry,0.092,log_diff,0.001,Table 3 Panel B (1),tables/table3.csv,confirmed_main_text,high,SE 0.011
+t3b_race_ni_sd,Table 3 Panel B,Implied SD theta race no-industry,0.072,sd,0.001,Table 3 Panel B (1),tables/table3.csv,confirmed_main_text,high,SE 0.015
+t3b_race_wi_mean,Table 3 Panel B,Implied mean theta race with-industry,0.093,log_diff,0.001,Table 3 Panel B (2),tables/table3.csv,confirmed_main_text,high,SE 0.013
+t3b_race_wi_sd,Table 3 Panel B,Implied SD theta race with-industry,0.072,sd,0.001,Table 3 Panel B (2),tables/table3.csv,confirmed_main_text,high,SE 0.015
+t3b_race_withinshare,Table 3 Panel B,Within-industry variance share (race),0.366,proportion,0.001,Table 3 Panel B (2) Within share,tables/table3.csv,confirmed_main_text,high,SE 0.234; one-third
+t3b_gender_ni_mean,Table 3 Panel B,Implied mean theta gender no-industry,-0.009,log_diff,0.001,Table 3 Panel B (3),tables/table3.csv,confirmed_main_text,high,SE 0.015
+t3b_gender_ni_sd,Table 3 Panel B,Implied SD theta gender no-industry,0.180,sd,0.001,Table 3 Panel B (3),tables/table3.csv,confirmed_main_text,high,SE 0.042
+t3b_gender_wi_mean,Table 3 Panel B,Implied mean theta gender with-industry,0.000,log_diff,0.001,Table 3 Panel B (4),tables/table3.csv,confirmed_main_text,high,SE 0.017
+t3b_gender_wi_sd,Table 3 Panel B,Implied SD theta gender with-industry,0.148,sd,0.001,Table 3 Panel B (4),tables/table3.csv,confirmed_main_text,high,SE 0.025; ~15pp
+t3b_gender_withinshare,Table 3 Panel B,Within-industry variance share (gender),0.562,proportion,0.001,Table 3 Panel B (4) Within share,tables/table3.csv,confirmed_main_text,high,SE 0.200; ~half
+race_firms_excluded,Section V.A,Firms excluded (cr<3% or jobs<40),11,count,0,"Sec V.A: ""exclude the eleven firms""",tables/reporting_statistics.txt,confirmed_main_text,high,108-11=97
+race_mean_thetahat,Section V.A,Unweighted mean theta-hat (97 firms),0.095,log_diff,0.001,"Sec V.A: ""average value of theta-hat ... 0.095""",data/theta_estimates_race.csv,confirmed_main_text,high,~10% White favoritism
+race_n_negative,Section V.A,Firms with negative theta-hat,21,count,0,"Sec V.A: ""Twenty-one of the 97""",data/theta_estimates_race.csv,confirmed_main_text,high,
+race_avg_se,Section V.A,Average SE of theta-hat (race),0.104,sd,0.001,"Sec V.A: ""average standard error of 0.104""",data/theta_estimates_race.csv,confirmed_main_text,high,
+race_jointnull_p,Section V.A,Bai-Santos-Shaikh joint-null p-value,0.94,pvalue,0.01,"Sec V.A: ""p-value of 0.94""",unknown,confirmed_main_text,high,Test all theta>=0
+race_spearman,Section V.A,"Spearman corr(theta-hat, s)",0.36,correlation,0.01,"Sec V.A: ""0.36 (p<0.001)""",data/theta_estimates_race.csv,confirmed_main_text,high,Precision dependence
+race_gmm_J_p_ni,Section V.B,Race GMM over-id p-value (no-industry),0.97,pvalue,0.01,"Sec V.B: ""(p=0.97)""",tables/table3.csv,confirmed_main_text,high,
+race_gmm_J_p_wi,Section V.D,Race GMM over-id p-value (industry),0.95,pvalue,0.01,"Sec V.D: ""(p=0.95)""",tables/table3.csv,confirmed_main_text,high,
+race_n_industries,Section V.D,Number of industry groupings (published),19,count,0,"Sec V.D: ""19 industry groupings""",dump/formatted_sic_names.csv,confirmed_main_text,high,>=3 firms each; arXiv had 24
+race_legacy_industries,Section V.D,Legacy KRW2022 industry codes,24,count,0,"fn15: ""24 industry codes""",unknown,confirmed_main_text,high,3 single-firm
+race_baseline_ngrades,Section V.E,Race baseline grades (lambda=0.25),3,count,0,"Sec V.E / Intro: ""three ... grades""",dump/ranking_results_log_dif_binary_race.csv,confirmed_main_text,high,
+race_baseline_dr,Section V.E,Race baseline discordance rate,3.9,percent,0.1,"Sec V.E: ""roughly 3.9 percent""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_baseline_tau,Section V.E,Race baseline tau-bar (lambda=0.25),0.21,correlation,0.01,"Sec V.E: ""tau is 0.21""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_baseline_r2,Section VI.A,Race baseline grade R-squared,25,percent,1,"Intro/VI.A: ""roughly 25 percent""",computed:krw_r2(verify.R),confirmed_main_text,high,arXiv had 19%; recomputed at render time by krw_r2() — verified PASS
+race_baseline_betweengrade_sd,Section VI.A,Race baseline between-grade SD,0.034,sd,0.001,"Sec VI.A: ""0.034 for the three grades""",computed:krw_r2(verify.R),confirmed_main_text,high,recomputed at render time by krw_r2() — verified PASS
+race_baseline_tau_l1,Section V.E,Race baseline Condorcet tau (lambda=1),0.46,correlation,0.01,"Sec V.E: ""tau=0.46""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_baseline_dr_l1,Section V.E,Race baseline Condorcet DR (lambda=1),0.27,proportion,0.01,"Sec V.E: ""0.27""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_baseline_worst_n,Section VI,Firms in worst grade (baseline),2,count,0,"Sec VI: ""the two firms""",dump/ranking_results_log_dif_binary_race.csv,confirmed_main_text,high,"Genuine Parts, AutoNation"
+race_baseline_best_n,Section VI,Firms in best grade (baseline),14,count,0,"Sec VI: ""Fourteen firms""",dump/ranking_results_log_dif_binary_race.csv,confirmed_main_text,high,
+race_baseline_worst_pm,Section VI,Worst-grade avg posterior mean theta (baseline),0.24,log_diff,0.01,"Sec VI: ""24 percent penalty""",dump/posteriors_groupfx0_race.csv,confirmed_main_text,high,
+race_baseline_best_pm,Section VI,Best-grade avg posterior mean theta (baseline),0.03,log_diff,0.01,"Sec VI: ""theta_i of 0.03""",dump/posteriors_groupfx0_race.csv,confirmed_main_text,high,
+race_industry_ngrades,Section V.E,Race industry grades (lambda=0.25),4,count,0,"Sec V.E / Intro: ""four grades""",dump/ranking_results_industry_rfe_binary_race.csv,confirmed_main_text,high,
+race_industry_dr,Section V.E,Race industry discordance rate,5.6,percent,0.1,"Sec V.E: ""5.6 percent""",tables/reporting_statistics.txt,confirmed_main_text,high,arXiv had 5.2%
+race_industry_tau,Section V.E,Race industry tau-bar (lambda=0.25),0.46,correlation,0.01,"Sec V.E: ""0.46""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_industry_r2,Section VI.A,Race industry grade R-squared,70,percent,1,"Sec VI.A: ""R^2 to 70 percent""",computed:krw_r2(verify.R),confirmed_main_text,high,arXiv had 47%; recomputed at render time by krw_r2() — verified PASS
+race_industry_tau_l1,Section V.E,Race industry Condorcet tau (lambda=1),0.59,correlation,0.01,"Sec V.E / Concl: ""0.59""",tables/reporting_statistics.txt,confirmed_main_text,high,Headline
+race_industry_dr_l1,Section V.E,Race industry Condorcet DR (lambda=1),0.20,proportion,0.01,"Sec V.E: ""0.20""",tables/reporting_statistics.txt,confirmed_main_text,high,
+race_industry_worst_n,Section VI.A,Firms in worst grade (industry),9,count,0,"Sec VI.A: ""two to nine""",dump/ranking_results_industry_rfe_binary_race.csv,confirmed_main_text,high,
+race_industry_2ndworst_n,Section VI.A,Firms in second-worst grade (industry),17,count,0,"Sec VI.A: ""seventeen firms""",dump/ranking_results_industry_rfe_binary_race.csv,confirmed_main_text,high,
+race_industry_best_n,Section VI.A,Firms in best grade (industry),11,count,0,"Sec VI.A: ""Eleven firms""",dump/ranking_results_industry_rfe_binary_race.csv,confirmed_main_text,high,
+race_industry_worst_pm,Section VI.A,Worst-grade avg posterior mean theta (industry),0.23,log_diff,0.01,"Sec VI.A: ""theta_i ... is 0.23""",dump/posteriors_groupfx1_race.csv,confirmed_main_text,high,
+race_industry_best_pm,Section VI.A,Best-grade avg posterior mean theta (industry),0.03,log_diff,0.01,"Sec VI.A: ""is 0.03""",dump/posteriors_groupfx1_race.csv,confirmed_main_text,high,
+race_contractors_n,Section VI,Federal contractors in sample,63,count,0,"Sec VI: ""63 of 97""",dump/federal_contractors.csv,confirmed_main_text,high,
+race_contractor_meanrank,Section VI,Mean Condorcet rank federal contractors,54,other,1,"Sec VI: ""is 54""",unknown,confirmed_main_text,high,Rank 1 = most biased
+race_noncontractor_meanrank,Section VI,Mean Condorcet rank non-contractors,42,other,1,"Sec VI: ""is 42""",unknown,confirmed_main_text,high,
+race_sic55_pm,Section VI.A,SIC55 auto industry posterior mean penalty,22,percent,1,"Sec VI.A: ""22 percent""",dump/posteriors_industry_race.csv,confirmed_main_text,high,Greatest bias
+race_sic54_pm,Section VI.A,SIC54 food stores posterior mean penalty,5,percent,1,"Sec VI.A: ""roughly 5 percent""",dump/posteriors_industry_race.csv,confirmed_main_text,high,Smallest bias
+race_dr_star_2star_base,Figure 10,DR star vs two-star (baseline),11,percent,1,"Sec VI.B: ""11 percent""",unknown,confirmed_main_text,high,Computed in generate_figures.py
+race_dr_star_3star_base,Figure 10,DR star vs three-star (baseline),0.8,percent,0.1,"Sec VI.B: ""only 0.8 percent""",unknown,confirmed_main_text,high,Nonadjacent
+race_dr_worst_best_ind,Figure 10,DR worst vs best grade (industry),0.4,percent,0.1,"Sec VI.B: ""is 0.4 percent""",unknown,confirmed_main_text,high,
+gender_sd_biascorrected,Section VII.A,Bias-corrected SD gender contact gaps,0.194,sd,0.001,"Sec VII.A: ""is 0.194""",data/theta_estimates_gender.csv,confirmed_main_text,high,~3x race
+gender_sd_race_compare,Section VII.A,Race bias-corrected SD (comparison),0.069,sd,0.001,"Sec VII.A: ""for race (0.069)""",data/theta_estimates_race.csv,confirmed_main_text,high,
+gender_baseline_ngrades,Section VII.E,Gender baseline grades (lambda=0.25),4,count,0,"Intro: ""four grade coding""",dump/ranking_results_log_dif_binary_gender.csv,confirmed_main_text,high,
+gender_baseline_r2,Section VIII,Gender baseline grade R-squared,44,percent,1,"Sec VIII: ""44 percent""",computed:krw_r2(verify.R),confirmed_main_text,high,recomputed at render time by krw_r2() — verified PASS
+gender_baseline_tau,Section VII.E,Gender baseline tau-bar (lambda=0.25),0.12,correlation,0.01,"Sec VII.E: ""versus 0.12""",tables/reporting_statistics.txt,confirmed_main_text,high,
+gender_baseline_dr,Section VII.E,Gender baseline discordance rate,1.8,percent,0.1,"Intro: ""1.8 percent""",tables/reporting_statistics.txt,confirmed_main_text,high,DR=0.018
+gender_industry_ngrades,Section VII.E,Gender industry grades (lambda=0.25),5,count,0,"Intro: ""five ... grades""",dump/ranking_results_industry_rfe_binary_gender.csv,confirmed_main_text,high,
+gender_industry_r2,Section VIII.A,Gender industry grade R-squared,38,percent,1,"Sec VIII.A: ""38 percent""",computed:krw_r2(verify.R),confirmed_main_text,high,recomputed at render time by krw_r2() — verified PASS
+gender_industry_tau,Section VII.E,Gender industry tau-bar (lambda=0.25),0.16,correlation,0.01,"Sec VII.E: ""tau=0.16""",tables/reporting_statistics.txt,confirmed_main_text,high,
+gender_industry_dr,Section VII.E,Gender industry discordance rate,1,percent,0.5,"Intro: ""1 percent""",tables/reporting_statistics.txt,confirmed_main_text,high,DR=0.01
+gender_extremal_logpts,Section VIII,Avg abs posterior mean extremal grades (baseline),34,log_points,1,"Intro: ""34 log points""",dump/posteriors_groupfx0_gender.csv,confirmed_main_text,high,
+gender_builders_bias_ind,Section VIII.A,Builders FirstSource posterior mean (industry),67,percent,1,"Sec VIII.A: ""67 percent""",tables/tableF6.csv,confirmed_main_text,high,Only star grade; =0.67
+gender_industry_best_pm,Section VIII.A,Best-grade avg posterior bias (industry),-40,percent,1,"Sec VIII.A: ""is -40 percent""",dump/posteriors_groupfx1_gender.csv,confirmed_main_text,high,Five-star
+gender_sic56_logpts,Section VIII.A,SIC56 apparel female advantage,33,log_points,1,"Sec VIII.A: ""33 log point advantage""",dump/posteriors_industry_gender.csv,confirmed_main_text,high,
+concl_n_comparisons,Conclusion,Pairwise firm comparisons C(97 2),4656,count,0,"Concl: ""4,656 possible pairwise""",unknown,confirmed_main_text,high,97*96/2
+concl_condorcet_corr,Conclusion,Condorcet corr with true ranks (industry race),0.59,correlation,0.01,"Concl: ""0.59""",tables/reporting_statistics.txt,confirmed_main_text,high,
+e1_oracle_tau_baseline,Table E1,Oracle E[tau] Baseline,0.191,correlation,0.001,"Online Appendix Table E1, Oracle risk E[tau], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,Expected rank correlation under oracle rule
+e1_oracle_tau_lognormal,Table E1,Oracle E[tau] Log-normal,0.209,correlation,0.001,"Online Appendix Table E1, Oracle risk E[tau], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_oracle_tau_industry,Table E1,Oracle E[tau] Industry effects,0.385,correlation,0.001,"Online Appendix Table E1, Oracle risk E[tau], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_oracle_dp_baseline,Table E1,Oracle E[DP] Baseline,0.042,proportion,0.001,"Online Appendix Table E1, Oracle risk E[DP], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,Discordance proportion
+e1_oracle_dp_lognormal,Table E1,Oracle E[DP] Log-normal,0.047,proportion,0.001,"Online Appendix Table E1, Oracle risk E[DP], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_oracle_dp_industry,Table E1,Oracle E[DP] Industry effects,0.053,proportion,0.001,"Online Appendix Table E1, Oracle risk E[DP], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_oracle_risk_baseline,Table E1,Oracle E[R] lambda=0.25 Baseline,-0.016,other,0.001,"Online Appendix Table E1, Oracle risk E[R], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,Bayes risk; negative value
+e1_oracle_risk_lognormal,Table E1,Oracle E[R] lambda=0.25 Log-normal,-0.017,other,0.001,"Online Appendix Table E1, Oracle risk E[R], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_oracle_risk_industry,Table E1,Oracle E[R] lambda=0.25 Industry effects,-0.056,other,0.001,"Online Appendix Table E1, Oracle risk E[R], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_tau_baseline,Table E1,Empirical E[tau] Baseline,0.212,correlation,0.001,"Online Appendix Table E1, Empirical risk E[tau], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_tau_lognormal,Table E1,Empirical E[tau] Log-normal,0.203,correlation,0.001,"Online Appendix Table E1, Empirical risk E[tau], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_tau_industry,Table E1,Empirical E[tau] Industry effects,0.316,correlation,0.001,"Online Appendix Table E1, Empirical risk E[tau], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_dp_baseline,Table E1,Empirical E[DP] Baseline,0.063,proportion,0.001,"Online Appendix Table E1, Empirical risk E[DP], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_dp_lognormal,Table E1,Empirical E[DP] Log-normal,0.060,proportion,0.001,"Online Appendix Table E1, Empirical risk E[DP], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_dp_industry,Table E1,Empirical E[DP] Industry effects,0.058,proportion,0.001,"Online Appendix Table E1, Empirical risk E[DP], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_risk_baseline,Table E1,Empirical E[R] lambda=0.25 Baseline,-0.006,other,0.001,"Online Appendix Table E1, Empirical risk E[R], Baseline",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_risk_lognormal,Table E1,Empirical E[R] lambda=0.25 Log-normal,-0.006,other,0.001,"Online Appendix Table E1, Empirical risk E[R], Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_empirical_risk_industry,Table E1,Empirical E[R] lambda=0.25 Industry effects,-0.035,other,0.001,"Online Appendix Table E1, Empirical risk E[R], Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_regret_baseline,Table E1,Regret Baseline,0.010,other,0.001,"Online Appendix Table E1, Regret panel, Baseline",tables/tableE1.tex,confirmed_online_appendix,high,Empirical minus oracle risk
+e1_regret_lognormal,Table E1,Regret Log-normal,0.011,other,0.001,"Online Appendix Table E1, Regret panel, Log-normal",tables/tableE1.tex,confirmed_online_appendix,high,
+e1_regret_industry,Table E1,Regret Industry effects,0.021,other,0.001,"Online Appendix Table E1, Regret panel, Industry effects",tables/tableE1.tex,confirmed_online_appendix,high,Text says regret ranges 0.012 to 0.017 but table cell is 0.021
+e1_n_simulations,Table E1,Number of Monte Carlo simulations,250,count,0,Online Appendix Appendix E text and Table E1 notes,tables/tableE1.tex,confirmed_online_appendix,high,sqrt(250) approx 15.8
+e1_text_tau_bias_baseline,Appendix E,Text-stated tau bias (baseline),0.036,correlation,0.001,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,tau biased up by ~0.036 in baseline
+e1_text_dr_bias_baseline,Appendix E,Text-stated DR bias (baseline),0.018,proportion,0.001,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,DR biased down by ~0.018 in baseline
+e1_text_tau_bias_industry,Appendix E,Text-stated tau bias (industry),0.023,correlation,0.001,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,Industry model: tau biased up by 0.023
+e1_text_dr_bias_industry,Appendix E,Text-stated DR bias (industry),0.011,proportion,0.001,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,Industry model: DR biased down by 0.011
+e1_text_dr_median_bias_industry,Appendix E,Text-stated median DR bias (industry),0.006,proportion,0.001,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,Median bias of DR estimate (industry)
+e1_text_dr_observed,Appendix E,Observed DR industry race model,5.6,percent,0.1,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,Estimated DR 5.6% in industry race model
+e1_text_dr_adjusted,Appendix E,Bias-adjusted DR industry race model,6.7,percent,0.1,Online Appendix Appendix E text,tables/tableE1.tex,confirmed_online_appendix,high,Adjusted up to 6.7% after bias correction
+f3_food_products_firms,Table F3,Food products (20) # firms,5,count,0,"Online Appendix Table F3, Food products (20), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_food_products_apps,Table F3,Food products (20) # apps,3333,count,0,"Online Appendix Table F3, Food products (20), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_manufacturing_firms,Table F3,Manufacturing (24-35) # firms,4,count,0,"Online Appendix Table F3, Manufacturing (24-35), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_manufacturing_apps,Table F3,Manufacturing (24-35) # apps,2931,count,0,"Online Appendix Table F3, Manufacturing (24-35), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_freight_transport_firms,Table F3,Freight / transport (42-47) # firms,4,count,0,"Online Appendix Table F3, Freight / transport (42-47), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_freight_transport_apps,Table F3,Freight / transport (42-47) # apps,3300,count,0,"Online Appendix Table F3, Freight / transport (42-47), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_communications_firms,Table F3,Communications (48) # firms,4,count,0,"Online Appendix Table F3, Communications (48), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_communications_apps,Table F3,Communications (48) # apps,2855,count,0,"Online Appendix Table F3, Communications (48), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_electric_gas_firms,Table F3,Electric / gas (49) # firms,3,count,0,"Online Appendix Table F3, Electric / gas (49), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_electric_gas_apps,Table F3,Electric / gas (49) # apps,2419,count,0,"Online Appendix Table F3, Electric / gas (49), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_wholesale_trade_firms,Table F3,Wholesale trade (50-51) # firms,8,count,0,"Online Appendix Table F3, Wholesale trade (50-51), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_wholesale_trade_apps,Table F3,Wholesale trade (50-51) # apps,6186,count,0,"Online Appendix Table F3, Wholesale trade (50-51), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_building_materials_firms,Table F3,Building materials (52) # firms,3,count,0,"Online Appendix Table F3, Building materials (52), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_building_materials_apps,Table F3,Building materials (52) # apps,2755,count,0,"Online Appendix Table F3, Building materials (52), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_general_merchandise_firms,Table F3,General merchandise (53) # firms,12,count,0,"Online Appendix Table F3, General merchandise (53), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,Largest group by firms
+f3_general_merchandise_apps,Table F3,General merchandise (53) # apps,10231,count,0,"Online Appendix Table F3, General merchandise (53), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,Largest group by apps
+f3_food_stores_firms,Table F3,Food stores (54) # firms,3,count,0,"Online Appendix Table F3, Food stores (54), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_food_stores_apps,Table F3,Food stores (54) # apps,2316,count,0,"Online Appendix Table F3, Food stores (54), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_auto_dealers_firms,Table F3,Auto dealers / services / parts (55) # firms,9,count,0,"Online Appendix Table F3, Auto dealers (55), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_auto_dealers_apps,Table F3,Auto dealers / services / parts (55) # apps,7857,count,0,"Online Appendix Table F3, Auto dealers (55), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,Second-largest by apps
+f3_apparel_stores_firms,Table F3,Apparel stores (56) # firms,5,count,0,"Online Appendix Table F3, Apparel stores (56), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_apparel_stores_apps,Table F3,Apparel stores (56) # apps,4303,count,0,"Online Appendix Table F3, Apparel stores (56), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_home_furnishing_firms,Table F3,Home furnishing stores (57) # firms,3,count,0,"Online Appendix Table F3, Home furnishing stores (57), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_home_furnishing_apps,Table F3,Home furnishing stores (57) # apps,2708,count,0,"Online Appendix Table F3, Home furnishing stores (57), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_eating_drinking_firms,Table F3,Eating / drinking (58) # firms,4,count,0,"Online Appendix Table F3, Eating / drinking (58), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_eating_drinking_apps,Table F3,Eating / drinking (58) # apps,4000,count,0,"Online Appendix Table F3, Eating / drinking (58), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_other_retail_firms,Table F3,Other retail (59) # firms,6,count,0,"Online Appendix Table F3, Other retail (59), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_other_retail_apps,Table F3,Other retail (59) # apps,5482,count,0,"Online Appendix Table F3, Other retail (59), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_banks_securities_firms,Table F3,Banks / securities (61-64) # firms,6,count,0,"Online Appendix Table F3, Banks / securities (61-64), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_banks_securities_apps,Table F3,Banks / securities (61-64) # apps,4280,count,0,"Online Appendix Table F3, Banks / securities (61-64), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_accommodation_realestate_firms,Table F3,Accommodation / real estate (65-70) # firms,4,count,0,"Online Appendix Table F3, Accommodation / real estate (65-70), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_accommodation_realestate_apps,Table F3,Accommodation / real estate (65-70) # apps,3024,count,0,"Online Appendix Table F3, Accommodation / real estate (65-70), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_personal_business_firms,Table F3,Personal / business services (72-73) # firms,5,count,0,"Online Appendix Table F3, Personal / business services (72-73), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_personal_business_apps,Table F3,Personal / business services (72-73) # apps,4177,count,0,"Online Appendix Table F3, Personal / business services (72-73), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_repair_services_firms,Table F3,Repair services (75-76) # firms,3,count,0,"Online Appendix Table F3, Repair services (75-76), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_repair_services_apps,Table F3,Repair services (75-76) # apps,2551,count,0,"Online Appendix Table F3, Repair services (75-76), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_health_engineering_firms,Table F3,Health and engineering services (80-87) # firms,6,count,0,"Online Appendix Table F3, Health and engineering (80-87), # Firms",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_health_engineering_apps,Table F3,Health and engineering services (80-87) # apps,4202,count,0,"Online Appendix Table F3, Health and engineering (80-87), # Apps",tables/tableF3.csv,confirmed_online_appendix,high,
+f3_total_firms,Table F3,Total # firms (sum of 19 rows),97,count,0,"Online Appendix Table F3, sum of column (1)",tables/tableF3.csv,confirmed_online_appendix,medium,No explicit Total row; sum of 19 rows = 97 (matches sample)
+f3_total_apps,Table F3,Total # apps (sum of 19 rows),78910,count,50,"Online Appendix Table F3, sum of column (3)",tables/tableF3.csv,confirmed_online_appendix,high,"Sum of 19 shipped Table F3 industry rows = 78910 (matches Table 2); earlier 73209 was an arXiv-era mis-transcription, corrected"
+f4_race_noind_theta_mean,Table F4,Race no-industry contact penalty theta mean,0.098,proportion,0.001,"Online Appendix Table F4, panel a Race, Mean, no-industry theta col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.010
+f4_race_noind_theta_sd,Table F4,Race no-industry contact penalty theta SD,0.076,sd,0.001,"Online Appendix Table F4, panel a Race, Std Dev, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.012
+f4_race_noind_theta_skew,Table F4,Race no-industry contact penalty theta skewness,2.027,other,0.02,"Online Appendix Table F4, panel a Race, Skewness, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.457; moment-type tol calibrated
+f4_race_noind_theta_kurt,Table F4,Race no-industry contact penalty theta excess kurtosis,7.610,other,0.1,"Online Appendix Table F4, panel a Race, Excess kurtosis, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 3.799; moment-type tol calibrated
+f4_race_ind_eta_mean,Table F4,Race industry effect eta mean,1.000,other,0.005,"Online Appendix Table F4, panel a Race, Mean, eta col (2)",tables/tableF4.csv,confirmed_online_appendix,high,Normalized to 1 for race; moment-type tol calibrated
+f4_race_ind_eta_sd,Table F4,Race industry effect eta SD,0.619,sd,0.005,"Online Appendix Table F4, panel a Race, Std Dev, eta col (2)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.186; moment-type tol calibrated
+f4_race_ind_eta_skew,Table F4,Race industry effect eta skewness,1.365,other,0.02,"Online Appendix Table F4, panel a Race, Skewness, eta col (2)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.800; moment-type tol calibrated
+f4_race_ind_eta_kurt,Table F4,Race industry effect eta excess kurtosis,0.384,other,0.1,"Online Appendix Table F4, panel a Race, Excess kurtosis, eta col (2)",tables/tableF4.csv,confirmed_online_appendix,high,SE 2.406; moment-type tol calibrated
+f4_race_ind_xi_mean,Table F4,Race firm effect xi mean,0.300,other,0.005,"Online Appendix Table F4, panel a Race, Mean, xi col (3)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.053; equals mu; moment-type tol calibrated
+f4_race_ind_xi_sd,Table F4,Race firm effect xi SD,0.115,sd,0.005,"Online Appendix Table F4, panel a Race, Std Dev, xi col (3)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.038; moment-type tol calibrated
+f4_race_ind_xi_skew,Table F4,Race firm effect xi skewness,1.611,other,0.02,"Online Appendix Table F4, panel a Race, Skewness, xi col (3)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.865; moment-type tol calibrated
+f4_race_ind_xi_kurt,Table F4,Race firm effect xi excess kurtosis,8.320,other,0.1,"Online Appendix Table F4, panel a Race, Excess kurtosis, xi col (3)",tables/tableF4.csv,confirmed_online_appendix,high,SE 6.045; moment-type tol calibrated
+f4_race_ind_theta_mean,Table F4,Race with-industry contact penalty theta mean,0.088,proportion,0.001,"Online Appendix Table F4, panel a Race, Mean, with-industry theta col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.016
+f4_race_ind_theta_sd,Table F4,Race with-industry contact penalty theta SD,0.076,sd,0.001,"Online Appendix Table F4, panel a Race, Std Dev, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.019
+f4_race_ind_theta_skew,Table F4,Race with-industry contact penalty theta skewness,2.885,other,0.02,"Online Appendix Table F4, panel a Race, Skewness, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.918; moment-type tol calibrated
+f4_race_ind_theta_kurt,Table F4,Race with-industry contact penalty theta excess kurtosis,15.369,other,0.1,"Online Appendix Table F4, panel a Race, Excess kurtosis, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 12.445; moment-type tol calibrated
+f4_gender_noind_theta_mean,Table F4,Gender no-industry contact penalty theta mean,-0.009,proportion,0.001,"Online Appendix Table F4, panel b Gender, Mean, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.000
+f4_gender_noind_theta_sd,Table F4,Gender no-industry contact penalty theta SD,0.184,sd,0.001,"Online Appendix Table F4, panel b Gender, Std Dev, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.037
+f4_gender_noind_theta_skew,Table F4,Gender no-industry contact penalty theta skewness,-0.469,other,0.02,"Online Appendix Table F4, panel b Gender, Skewness, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 2.378; moment-type tol calibrated
+f4_gender_noind_theta_kurt,Table F4,Gender no-industry contact penalty theta excess kurtosis,29.680,other,0.1,"Online Appendix Table F4, panel b Gender, Excess kurtosis, no-industry col (1)",tables/tableF4.csv,confirmed_online_appendix,high,SE 24.073; moment-type tol calibrated
+f4_gender_ind_eta_sd,Table F4,Gender industry effect eta SD,0.644,sd,0.005,"Online Appendix Table F4, panel b Gender, Std Dev, eta col (2)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.257; moment-type tol calibrated
+f4_gender_ind_xi_sd,Table F4,Gender firm effect xi SD,0.686,sd,0.005,"Online Appendix Table F4, panel b Gender, Std Dev, xi col (3)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.191; moment-type tol calibrated
+f4_gender_ind_theta_mean,Table F4,Gender with-industry contact penalty theta mean,0.000,proportion,0.001,"Online Appendix Table F4, panel b Gender, Mean, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.008
+f4_gender_ind_theta_sd,Table F4,Gender with-industry contact penalty theta SD,0.163,sd,0.001,"Online Appendix Table F4, panel b Gender, Std Dev, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 0.035
+f4_gender_ind_theta_skew,Table F4,Gender with-industry contact penalty theta skewness,-1.296,other,0.02,"Online Appendix Table F4, panel b Gender, Skewness, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 1.657; moment-type tol calibrated
+f4_gender_ind_theta_kurt,Table F4,Gender with-industry contact penalty theta excess kurtosis,22.735,other,0.1,"Online Appendix Table F4, panel b Gender, Excess kurtosis, with-industry col (4)",tables/tableF4.csv,confirmed_online_appendix,high,SE 7.822; moment-type tol calibrated
+f5_genuineparts_theta,Table F5,Genuine Parts (Napa) theta_hat race,0.33,log_diff,0.01,"Online Appendix Table F5, Genuine Parts (55), theta_hat",tables/tableF5.csv,confirmed_online_appendix,high,SE 0.07; apps 966
+f5_genuineparts_postmean_baseline,Table F5,Genuine Parts (Napa) baseline posterior mean race,0.25,proportion,0.01,"Online Appendix Table F5, Genuine Parts, Baseline Post Mean",tables/tableF5.csv,confirmed_online_appendix,high,Baseline Grd 1; Cond rank 1
+f5_genuineparts_postmean_industry,Table F5,Genuine Parts (Napa) industry posterior mean race,0.23,proportion,0.01,"Online Appendix Table F5, Genuine Parts, Industry Post Mean",tables/tableF5.csv,confirmed_online_appendix,high,Industry Grd 1; Cond rank 4
+f5_autonation_theta,Table F5,AutoNation theta_hat race,0.43,log_diff,0.01,"Online Appendix Table F5, AutoNation (55), theta_hat",tables/tableF5.csv,confirmed_online_appendix,high,SE 0.13; largest theta_hat; apps 869
+f5_autonation_condrank_industry,Table F5,AutoNation industry Condorcet rank race,1,count,0,"Online Appendix Table F5, AutoNation, Industry Cond rank",tables/tableF5.csv,confirmed_online_appendix,high,Rank 1 of 97 in industry model
+f5_disney_theta,Table F5,Disney (incl stores) theta_hat race,-0.12,log_diff,0.01,"Online Appendix Table F5, Disney (59), theta_hat",tables/tableF5.csv,confirmed_online_appendix,high,SE 0.24; negative; apps 858
+f5_walmart_theta,Table F5,Walmart theta_hat race,0.12,log_diff,0.01,"Online Appendix Table F5, Walmart (53), theta_hat",tables/tableF5.csv,confirmed_online_appendix,high,SE 0.07; apps 400 (smallest cited)
+f5_charterspectrum_theta,Table F5,Charter / Spectrum theta_hat race,-0.03,log_diff,0.01,"Online Appendix Table F5, Charter / Spectrum (48), theta_hat",tables/tableF5.csv,confirmed_online_appendix,high,SE 0.03; apps 960; Cond rank 97 (best)
+f5_charterspectrum_condrank_baseline,Table F5,Charter / Spectrum baseline Condorcet rank race,97,count,0,"Online Appendix Table F5, Charter / Spectrum, Baseline Cond rank",tables/tableF5.csv,confirmed_online_appendix,high,Rank 97 of 97 (least biased)
+f6_buildersfirstsource_theta,Table F6,Builders FirstSource theta_hat gender,1.57,log_diff,0.01,"Online Appendix Table F6, Builders FirstSource (24-35), theta_hat",tables/tableF6.csv,confirmed_online_appendix,high,SE 0.55; apps 581; favors male
+f6_buildersfirstsource_postmean_baseline,Table F6,Builders FirstSource baseline posterior mean gender,0.90,proportion,0.01,"Online Appendix Table F6, Builders FirstSource, Baseline Post Mean",tables/tableF6.csv,confirmed_online_appendix,high,Grd 1; Cond rank 1
+f6_buildersfirstsource_postmean_industry,Table F6,Builders FirstSource industry posterior mean gender,0.67,proportion,0.01,"Online Appendix Table F6, Builders FirstSource, Industry Post Mean",tables/tableF6.csv,confirmed_online_appendix,high,= 67% bias cited in text; Grd 1; Cond rank 1
+f6_lkq_theta,Table F6,LKQ Auto theta_hat gender,0.66,log_diff,0.01,"Online Appendix Table F6, LKQ Auto (50-51), theta_hat",tables/tableF6.csv,confirmed_online_appendix,high,SE 0.21; apps 587; Cond rank 2
+f6_nationwide_theta,Table F6,Nationwide theta_hat gender,-0.73,log_diff,0.01,"Online Appendix Table F6, Nationwide (61-64), theta_hat",tables/tableF6.csv,confirmed_online_appendix,high,SE 0.48; favors female; apps 455
+f6_ascena_theta,Table F6,Ascena (Ann Taylor / Loft) theta_hat gender,-0.66,log_diff,0.01,"Online Appendix Table F6, Ascena (56), theta_hat",tables/tableF6.csv,confirmed_online_appendix,high,SE 0.17; favors female; apps 590
+f6_ascena_condrank_baseline,Table F6,Ascena baseline Condorcet rank gender,96,count,0,"Online Appendix Table F6, Ascena, Baseline Cond rank",tables/tableF6.csv,confirmed_online_appendix,high,Rank 96 of 96; gender sample ranks 96 firms (cf B.3)
+scale_apps_data_dta,Ch.1 / data.dta,Applications in full data.dta (full experimental frame),83643,count,0,data.dta row count (verified pandas),data/data.dta,verified_from_data,high,"108 firms, 11114 jobs; paper rounds to ~84,000; 01-overview correctly reports 83643"
+scale_jobs_data_dta,Ch.1 / data.dta,Jobs (job_id) in full data.dta,11114,count,0,data.dta unique job_id (verified),data/data.dta,verified_from_data,high,"Paper rounds to ~11,000"
+scale_apps_dropped,Section V.A,Applications in the 11 excluded firms,4733,count,0,83643 - 78910 (verified),data/data.dta,verified_from_data,high,Firms with mean cb<0.03 or <40 jobs; 83643 full - 78910 estimation
+t3_race_ni_mu_se,Table 3 col1,SE mu race no-industry,0.147,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_race_ni_sigmav_se,Table 3 col1,SE sigma_v race no-industry,0.106,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_race_wi_beta_se,Table 3 col2,SE beta race with-industry,0.15,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_race_wi_mu_se,Table 3 col2,SE mu race with-industry,0.096,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_race_wi_sigmaeta_se,Table 3 col2,SE sigma_eta race with-industry,0.12,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_race_wi_sigmaxi_se,Table 3 col2,SE sigma_xi race with-industry,0.054,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_ni_beta_se,Table 3 col3,SE beta gender no-industry,0.242,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_ni_mu_se,Table 3 col3,SE mu gender no-industry,0.015,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_ni_sigmav_se,Table 3 col3,SE sigma_v gender no-industry,0.561,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_wi_beta_se,Table 3 col4,SE beta gender with-industry,0.204,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_wi_mu_se,Table 3 col4,SE mu gender with-industry,0.017,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_wi_sigmaeta_se,Table 3 col4,SE sigma_eta gender with-industry,0.191,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv
+t3_gender_wi_sigmaxi_se,Table 3 col4,SE sigma_xi gender with-industry,0.213,sd,0.001,Table 3 parenthetical SE,tables/table3.csv,confirmed_main_text,high,positional even-row of headerless table3.csv

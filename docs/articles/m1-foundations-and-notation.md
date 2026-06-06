@@ -1,0 +1,405 @@
+# M1: Foundations and notation
+
+Abstract
+
+This is the first method-track vignette: it pins down the notation every
+later vignette relies on, before any stage is derived. We state the KRW
+decision problem — grade noisy firm-level estimates by their latent
+effect, honestly, respecting the noise — and lay out a compact symbol
+table. We then fix the two load-bearing frozen invariants. The first is
+the grade-direction triple: why the exported grade 1 is the most-extreme
+theta, why the code carries the win-count S_i built from the binaries
+D_ij (not D_ji), and why the export is dense_rank(S_i, ascending =
+FALSE). The second is the firms-vs-names welfare flip: the identical
+machinery means opposite welfare readings on the same printed label,
+which is exactly why gradepath prints are result-first and
+quantity-anchored (the package decision GP-DEC-14-A). Each statement is
+verified in code against the bundled 97-firm parity fit, so the notation
+is not asserted but checked. The reader leaves with every symbol fixed
+and ready for m2-m5.
+
+This is the foundations vignette for the method track. It is a lookup,
+not a derivation: it summarizes the theory from Kline, Rose & Walters
+(Kline et al. 2024) (the formal statements are in their Appendix A) and
+pins the notation that m2-m5 build on. The two frozen invariants it
+fixes — the grade-direction triple and the firms-vs-names welfare flip —
+are reproduced faithfully and then checked in code, every displayed
+equation followed by a verification panel against the bundled parity
+fit.
+
+We load that fit once, at the top, and every panel below is a fast read
+or compute off it. There is no solve.
+
+``` r
+
+fit <- gp_parity_fit("race")
+```
+
+This is the proven 97-firm RACE report card: grades `2 / 81 / 14` at the
+KRW baseline `lambda = 0.25`. The applied track shows how it is
+produced; here it is the ground truth we check the notation against.
+
+## 1. The KRW decision problem
+
+You hold `n` units — here 97 large U.S. firms — each with a noisy point
+estimate $`\hat\theta_i`$ of a latent effect $`\theta_i`$ and a standard
+error $`s_i`$ that says how precisely $`\hat\theta_i`$ was measured. For
+firms, $`\theta_i`$ is the firm’s discrimination: the gap in callback
+rates between otherwise-identical White and Black applicants. The
+estimates are heteroskedastic — some firms were measured with far more
+applications than others — so the noisiest estimates look the most
+extreme purely by chance.
+
+> “Estimates of firm-level discrimination are inherently noisy … A
+> report card summarizes this evidence by sorting firms into a small
+> number of grades.” — Kline, Rose & Walters (Kline et al. 2024)
+
+The decision problem is therefore not “rank the units” but “sort the
+units into a few **honest grades** that respect the noise.” Two units
+belong in the same grade when the data cannot decisively separate them;
+they belong in different grades only when the posterior evidence
+supports an ordering. The machinery that does this — deconvolve a prior,
+shrink to posteriors, compare every pair, solve a grade integer program
+along an information-reliability frontier — is empirical Bayes in
+lineage (Walters 2024) and is the subject of m2-m5. This vignette fixes
+the symbols those stages speak in, and the two directional facts that
+are easiest to get backwards.
+
+## 2. The symbol table
+
+The table below is the compact reference: each symbol, the scale it
+lives on, and a sign-or-direction note. It is reproduced from the
+package notation source of truth (KRW Appendix A); downstream vignettes
+cite it rather than redefining. The symbols group by the stage they
+first appear in — estimation, standardization, prior/posterior, social
+choice, grading.
+
+| Symbol | Meaning | Scale / units | Sign or direction note |
+|----|----|----|----|
+| $`\theta_i`$ | Latent unit effect: a firm’s discrimination, or a name’s contact propensity | Latent (standardized) | Larger $`\theta`$ = more extreme. *What “extreme” means flips by dataset — see §6.* |
+| $`\hat\theta_i`$ | The noisy stage-1 estimate of $`\theta_i`$ | Same scale as $`\theta`$ | Input to standardization; not graded directly. |
+| $`s_i`$ | Standard error / noise scale of $`\hat\theta_i`$ | Same scale as $`\theta`$ | Heteroskedastic across units; drives the precision dependence in §3. |
+| $`\beta`$ | Precision-dependence exponent in $`\theta = s^{\beta}\,v`$ | Dimensionless | gradepath $`\beta`$-GMM estimate; $`\beta = 0`$ recovers the homoskedastic case. |
+| $`v_i`$ | Precision-independent component, $`v_i = \theta_i / s_i^{\beta}`$ | Standardized | The latent quantity the prior $`G`$ models. |
+| $`r_i`$ | Standardized residual scale, $`r_i = \hat\theta_i / s_i^{\beta}`$ | Standardized | **The scale on which the prior $`G`$ and the weights live.** Built in §3. |
+| $`G`$ | The deconvolved prior over $`v`$ (equivalently over $`r`$) | Distribution | Estimated by gradepath’s native deconvolution (m3). |
+| $`\pi_{ij}`$ | Pairwise outranking posterior, $`\pi_{ij} = \Pr(\theta_i > \theta_j \mid \text{data})`$ | Probability $`\in [0,1]`$ | $`\pi_{ij} + \pi_{ji} = 1`$ (ties measure-zero). The primitive the grade IP consumes. §4. |
+| $`S_i`$ | Code win-count, $`S_i = \sum_j D_{ij}`$ | Integer $`\ge 0`$ | The row-sum the **exported** grade is built from. §5. |
+| $`\text{grade}_i`$ | The exported integer grade label, via $`\operatorname{dense\_rank}(S_i,\ \text{asc}=\text{FALSE})`$ | Integer $`\in \{1,\dots,n\}`$ | **Grade 1 = largest $`S_i`$ = most-extreme $`\theta`$.** Carries no superiority statement. §5. |
+| $`\mathrm{DR}`$ | Discordance (disagreement) rate of a grading | Rate $`\in [0,1]`$ | Fraction of comparable pairs the grading orders against the posterior. Lower is cleaner. |
+| $`\bar\tau`$ | Posterior expected Kendall rank agreement | $`\in [-1,1]`$ | Higher is cleaner; the information axis of the frontier. |
+| $`\lambda`$ | Grade-coarseness / loss-tradeoff weight | $`\in [0,1]`$ | Separation threshold $`1/(1+\lambda)`$; baseline $`\lambda = 0.25 \Rightarrow 0.80`$. §7. |
+
+Every symbol the method track uses, defined once.
+
+These symbols map onto concrete accessor slots on a fit, which is what
+lets us verify each definition rather than assert it. The crosswalk we
+lean on below: $`\beta`$ is `fit$precision_fit$parameters$beta`; the
+pairwise matrix $`\pi_{ij}`$ is `get_pairwise(fit)$matrix`; the exported
+grade is `as.data.frame(fit)$grade` (equivalently `get_grades(fit)`);
+the frontier quantities $`\mathrm{DR}`$ and $`\bar\tau`$ live in
+`fit$grade_path$summary`; and the selected $`\lambda`$ is
+`fit$selected_grade$lambda`.
+
+## 3. Precision dependence and the r-scale
+
+The first stage standardizes away the precision dependence. KRW’s
+convention is
+
+``` math
+\theta_i \;=\; s_i^{\beta}\, v_i,
+```
+
+where $`v_i`$ is the precision-independent component and the exponent
+$`\beta`$ is estimated by gradepath’s $`\beta`$-GMM step. The object the
+rest of the pipeline actually lives on is the **standardized r-scale**,
+
+``` math
+r_i \;=\; \hat\theta_i \,/\, s_i^{\beta},
+```
+
+the scale on which the prior $`G`$ and the comparison weights are built.
+The derivation — the GMM moments, the multiplicative-vs-additive split —
+is m2; here we only fix $`\beta`$ and $`r`$ and check them.
+
+**Verification panel.** Read $`\beta`$ off the fit (it should match the
+published KRW report), then compute the r-scale by hand from
+$`\hat\theta`$ and $`s`$. Note the standard-error column is `est$s` (not
+`est$se`):
+
+``` r
+
+beta <- fit$precision_fit$parameters$beta
+round(beta, 4)                              # the precision exponent
+#> [1] 0.5095
+
+est <- fit$estimates
+r   <- est$theta_hat / est$s^beta           # the standardized r-scale
+head(r, 3)
+#> [1] 0.8330686 0.3116278 0.4740612
+```
+
+gradepath lands on $`\beta = 0.5095`$, matching the `0.510` KRW report.
+The same value is reachable through the prior accessor,
+`get_prior(fit)$metadata$beta`, since the prior is the object that lives
+on the r-scale. The first three r-scale values are 0.8331, 0.3116,
+0.4741 — there is no `fit$precision_fit$r` slot; the r-scale is
+computed, never stored, exactly as above.
+
+## 4. The pairwise primitive
+
+Before grades there are **pairwise outranking posteriors**. For every
+ordered pair $`(i, j)`$,
+
+``` math
+\pi_{ij} \;=\; \Pr\!\big(\theta_i > \theta_j \mid \text{data}\big),
+\qquad
+\pi_{ij} + \pi_{ji} = 1,
+```
+
+with ties measure-zero under the continuous prior $`G`$. This matrix —
+the posterior probability that one unit’s latent effect exceeds
+another’s — is the only object the grade integer program consumes. m3
+derives the posteriors and m4 shows how the IP reads $`\pi`$.
+
+**Verification panel.** Pull the pairwise matrix and confirm the
+antisymmetry identity holds exactly: a single entry plus its transpose
+is 1, and the maximum deviation across all off-diagonal pairs is 0.
+
+``` r
+
+M <- get_pairwise(fit)$matrix
+M[1, 2] + M[2, 1]                           # one pair: exactly 1
+#> [1] 1
+
+max(abs((M + t(M))[upper.tri(M)] - 1))      # worst-case deviation across all pairs
+#> [1] 0
+```
+
+The pair sums to 1 and the worst-case deviation is 0, so
+$`\pi_{ij} + \pi_{ji} = 1`$ holds to machine zero. This is the primitive
+the grade label is built from next.
+
+## 5. The grade-direction triple
+
+This is the most parity-critical definition in the package, and the one
+most easily gotten backwards. Three different objects each carry a
+notion of “rank,” they use **different index conventions**, and they
+point in **different directions**. Stating all three together, once, is
+the only defense against an off-by-transpose error that would silently
+invert every report card.
+
+**1. Paper ordinal (top-is-1).** KRW assign
+
+``` math
+d_i^{*} \;=\; 1 + \sum_{j} d_{ji}^{*},
+```
+
+where $`d_{ji}^{*} = 1`$ when unit $`j`$ sits above unit $`i`$ in the
+partial order. So **paper grade 1 is the TOP** of the order (nothing
+above it), and the grade *number* increases as a unit falls. Note the
+transposed index order $`d_{ji}^{*}`$: it counts how many units are
+above $`i`$.
+
+**2. Code win-count (independent binaries).** The solver works with
+
+``` math
+S_i \;=\; \sum_{j} D_{ij},
+```
+
+where $`D_{ij} = 1`$ when the grading ranks $`i`$**above** $`j`$. The
+code uses $`D_{ij}`$, **not** $`D_{ji}`$, and $`D_{ij}`$ and $`D_{ji}`$
+are **independent** solver binaries (the IP does not hard-impose
+$`D_{ij} + D_{ji} = 1`$; antisymmetry and transitivity enter as
+constraints, see m4). So $`S_i`$ is a *win-count*: how many units $`i`$
+is placed above.
+
+**3. Exported grade (dense-rank of the win-count, descending).** The
+grade gradepath exports is
+
+``` math
+\text{grade}_i \;=\; \operatorname{dense\_rank}\!\big(S_i;\ \text{ascending}=\text{FALSE}\big),
+```
+
+so **exported grade 1 = the LARGEST $`S_i`$ = the most-extreme
+$`\theta`$.** The largest win-count earns the label 1.
+
+The three reconcile by design. The unit at the top of the partial order
+has nothing above it, so it is placed above the most other units and
+earns the largest $`S_i`$ — and therefore the export’s label 1. The
+paper’s top-is-1 ordinal and the code’s largest-$`S_i`$-is-1 export thus
+agree on *which* unit gets the label 1: the most-extreme one.
+
+> **The one sentence to remember.** Exported grade 1 = largest $`S_i`$ =
+> the most-extreme $`\theta`$; the code uses $`D_{ij}`$ (not
+> $`D_{ji}`$); the export is `dense_rank(S_i, ascending = FALSE)`. The
+> grade label is an integer in $`\{1, \dots, n\}`$ — a sorting index,
+> not a letter such as A or B — and carries no superiority statement.
+
+**Verification panel.** We cannot read the internal $`D_{ij}`$ or
+$`S_i`$ off the fit (they are solver-internal), but the directional
+consequence is checkable on the exported label: if grade 1 is the
+most-extreme $`\theta`$, then the mean posterior effect must be
+**largest** in grade 1 and decrease monotonically as the grade number
+rises. Group the report card’s `posterior_mean` by grade:
+
+``` r
+
+card <- as.data.frame(fit)
+tapply(card$posterior_mean, card$grade, mean)
+#>          1          2          3 
+#> 0.24135079 0.10305885 0.03308774
+```
+
+Grade 1 has the highest mean posterior effect (0.241), grade 2 is lower
+(0.103), and grade 3 is lowest (0.033) — monotonically decreasing. This
+numerically confirms that the exported grade 1 is the most-extreme
+$`\theta`$, exactly as the triple states.
+
+## 6. The firms-vs-names welfare flip
+
+The grading machinery is *identical* for both KRW datasets. What differs
+is the **welfare meaning** of “most extreme,” and therefore of the
+printed grade 1. This is the second frozen invariant, and the reason
+result prose must be written carefully. On the **same exported label**
+produced by the dense-rank rule of §5:
+
+- **FIRMS.** Grade 1 = the **most discriminatory** firm (largest
+  $`\theta`$ = the widest gap in callback by applicant race). This is
+  the worst firm for workers. Directional prose: *“more
+  discriminatory,”* *“a wider contact-rate gap.”*
+- **NAMES.** Grade 1 = the **best-treated** name (largest $`\theta`$ =
+  the highest contact/callback rate). This is the best outcome for that
+  name. Directional prose: *“a higher posterior contact rate.”*
+
+The machinery does **not** know which dataset it is grading; the flip is
+in the *interpretation*, supplied by the analyst, not in the code. So
+one must **never** write a valenced verb that inverts in meaning between
+firms and names — generic “best/worst” across both datasets inverts, as
+do generic ranking-contest verbs. Only the directional,
+quantity-anchored prose above is safe: it names the quantity (“a wider
+contact-rate gap,” “a higher posterior contact rate”) rather than a
+verdict, so the same sentence reads correctly for either dataset.
+
+This is exactly why gradepath’s print methods and report-card labels
+follow the package decision `GP-DEC-14-A`: the rendered output is
+**result-first** and names the quantity (a posterior gap, a contact
+rate) rather than a valenced verdict, so the same code path serves both
+datasets without the printed text lying about one of them. The package
+ships the firms data; names is a separate KRW dataset, so the flip here
+is conceptual — but the discipline it imposes on the prose is in force
+on every fit. No numeric panel is needed: the grade label is computed
+identically for both datasets, and the welfare reading is the analyst’s
+to supply.
+
+## 7. Loss, risk, and the lambda threshold
+
+A light note, with the full treatment deferred to m4. The grade integer
+program minimizes a Bayes risk that trades the discordance rate
+$`\mathrm{DR}`$ against the posterior Kendall agreement $`\bar\tau`$,
+governed by the coarseness weight $`\lambda \in [0, 1]`$. The one piece
+of $`\lambda`$ mechanics worth fixing here is the **separation
+threshold**: a pair $`(i, j)`$ may share a grade only when neither
+outranks the other decisively, i.e. when
+
+``` math
+\max(\pi_{ij},\, \pi_{ji}) \;<\; \frac{1}{1+\lambda}.
+```
+
+At the baseline $`\lambda = 0.25`$ the threshold is $`1/1.25 = 0.80`$:
+two units may share a grade only if the stronger pairwise probability is
+below $`0.80`$. At $`\lambda = 1`$ the threshold is $`0.5`$ and the
+partition collapses to the Condorcet (finest-separation) ordering. The
+bundled fit was selected at the baseline, which we can read directly:
+
+``` r
+
+fit$selected_grade$lambda                   # the selected coarseness weight
+#> [1] 0.25
+1 / (1 + fit$selected_grade$lambda)         # the separation threshold
+#> [1] 0.8
+```
+
+The fit sits at $`\lambda = 0.25`$ with separation threshold $`0.8`$.
+The grade IP that turns this threshold into the partition — and the
+frontier the package sweeps $`\lambda`$ along — is derived in m4.
+
+## 8. Where to next
+
+With the symbols fixed and the two invariants checked, the stage
+derivations follow in order:
+
+- **Precision and standardization** —
+  [m2](https://joonho112.github.io/gradepath/articles/m2-precision-and-standardization.md)
+  derives the $`\beta`$-GMM step behind §3 (the moments, the
+  multiplicative-vs-additive split).
+- **Deconvolution and posterior** —
+  [`vignette("m3-deconvolution-and-posterior")`](https://joonho112.github.io/gradepath/articles/m3-deconvolution-and-posterior.md)
+  builds the prior $`G`$, the posteriors, and the pairwise matrix
+  $`\pi_{ij}`$ of §4.
+- **Grading frontier and report cards** —
+  [`vignette("m4-grading-frontier-and-report-cards")`](https://joonho112.github.io/gradepath/articles/m4-grading-frontier-and-report-cards.md)
+  derives the grade IP, the win-count $`S_i`$ of §5, and the $`\lambda`$
+  frontier of §7.
+- **Two-level and calibration** —
+  [`vignette("m5-two-level-and-calibration")`](https://joonho112.github.io/gradepath/articles/m5-two-level-and-calibration.md)
+  extends the model to industries and validates the pipeline by Monte
+  Carlo.
+
+For the workflow side, the applied track runs the same pipeline as a
+hands-on example:
+[a1](https://joonho112.github.io/gradepath/articles/a1-getting-started.md)
+is the first contact, and
+[`vignette("a2-the-grading-workflow")`](https://joonho112.github.io/gradepath/articles/a2-the-grading-workflow.md)
+walks the seven stages with race and gender side by side.
+
+### Provenance
+
+``` r
+
+sessionInfo()
+#> R version 4.6.0 (2026-04-24)
+#> Platform: aarch64-apple-darwin23
+#> Running under: macOS Tahoe 26.2
+#> 
+#> Matrix products: default
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#> 
+#> locale:
+#> [1] en_US/en_US/en_US/C/en_US/en_US
+#> 
+#> time zone: America/Chicago
+#> tzcode source: internal
+#> 
+#> attached base packages:
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
+#> 
+#> other attached packages:
+#> [1] ggplot2_4.0.3   gradepath_0.5.0
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] Matrix_1.7-5       ebrecipe_0.5.0     gtable_0.3.6       jsonlite_2.0.0    
+#>  [5] dplyr_1.2.1        compiler_4.6.0     tidyselect_1.2.1   slam_0.1-55       
+#>  [9] dichromat_2.0-0.1  jquerylib_0.1.4    splines_4.6.0      systemfonts_1.3.2 
+#> [13] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     
+#> [17] lattice_0.22-9     R6_2.6.1           generics_0.1.4     knitr_1.51        
+#> [21] htmlwidgets_1.6.4  gurobi_13.0-1      tibble_3.3.1       desc_1.4.3        
+#> [25] bslib_0.11.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       
+#> [29] cachem_1.1.0       xfun_0.57          fs_2.1.0           sass_0.4.10       
+#> [33] S7_0.2.2           otel_0.2.0         cli_3.6.6          withr_3.0.2       
+#> [37] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.0        
+#> [41] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        
+#> [45] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.0       
+#> [49] pkgconfig_2.0.3    htmltools_0.5.9
+```
+
+## References
+
+Kline, Patrick, Evan K. Rose, and Christopher R. Walters. 2024. “A
+Discrimination Report Card.” *American Economic Review* 114 (8):
+2472–525. <https://doi.org/10.1257/aer.20230700>.
+
+Walters, Christopher R. 2024. “Empirical Bayes Methods in Labor
+Economics.” In *Handbook of Labor Economics*, vol. 5. Elsevier.
+<https://doi.org/10.1016/bs.heslab.2024.11.001>.

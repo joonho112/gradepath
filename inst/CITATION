@@ -1,0 +1,30 @@
+citHeader(
+  "To cite gradepath in publications, please cite both the package and the method it replicates:"
+)
+
+bibentry(
+  bibtype = "Manual",
+  title   = "gradepath: Discrimination Report Cards via a Native Kline-Rose-Walters Core",
+  author  = person("JoonHo", "Lee",
+                   email   = "jlee296@ua.edu",
+                   comment = c(ORCID = "0009-0006-4019-8703")),
+  year    = "2026",
+  note    = "R package version 0.5.0",
+  url     = "https://github.com/joonho112/gradepath"
+)
+
+bibentry(
+  bibtype = "Article",
+  title   = "A Discrimination Report Card",
+  author  = c(
+    person("Patrick", "Kline"),
+    person("Evan K.", "Rose"),
+    person("Christopher R.", "Walters")
+  ),
+  journal = "American Economic Review",
+  year    = "2024",
+  volume  = "114",
+  number  = "8",
+  pages   = "2472--2525",
+  doi     = "10.1257/aer.20230700"
+)

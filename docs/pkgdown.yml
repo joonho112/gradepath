@@ -1,0 +1,18 @@
+pandoc: '3.8'
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  a1-getting-started: a1-getting-started.html
+  a2-the-grading-workflow: a2-the-grading-workflow.html
+  a3-reading-and-exporting-results: a3-reading-and-exporting-results.html
+  a4-figures: a4-figures.html
+  a5-solvers-and-calibration: a5-solvers-and-calibration.html
+  m1-foundations-and-notation: m1-foundations-and-notation.html
+  m2-precision-and-standardization: m2-precision-and-standardization.html
+  m3-deconvolution-and-posterior: m3-deconvolution-and-posterior.html
+  m4-grading-frontier-and-report-cards: m4-grading-frontier-and-report-cards.html
+  m5-two-level-and-calibration: m5-two-level-and-calibration.html
+last_built: 2026-06-06T13:33Z
+urls:
+  reference: https://joonho112.github.io/gradepath/reference
+  article: https://joonho112.github.io/gradepath/articles

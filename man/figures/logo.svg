@@ -1,0 +1,59 @@
+<!-- Concept 2: Information-reliability frontier (Pareto curve, Fig 6b); accent #1F6F8B -->
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="692.8" viewBox="0 0 600 692.8">
+  <defs>
+    <clipPath id="hex">
+      <polygon points="300,0 600,173.2 600,519.6 300,692.8 0,519.6 0,173.2"/>
+    </clipPath>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF1F4"/>
+    </linearGradient>
+    <linearGradient id="region" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1F6F8B" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#1F6F8B" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <g clip-path="url(#hex)">
+    <rect x="0" y="0" width="600" height="692.8" fill="url(#bg)"/>
+
+    <!-- subtle implied axes: reliability (horizontal) and information (vertical) -->
+    <g stroke="#9DB3BD" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.9">
+      <line x1="95" y1="455" x2="540" y2="455"/>
+      <line x1="95" y1="455" x2="95" y2="150"/>
+    </g>
+
+    <!-- shaded feasible region under the frontier (concave Pareto curve) -->
+    <path d="M 95 440 C 245 300 415 178 518 168 L 518 455 L 95 455 Z" fill="url(#region)"/>
+
+    <!-- the information-reliability frontier: bold concave Pareto curve -->
+    <path d="M 95 440 C 245 300 415 178 518 168"
+          fill="none" stroke="#2C3E50" stroke-width="13"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- 1-2 dominated (grey) points sitting below the frontier -->
+    <g>
+      <circle cx="250" cy="380" r="20" fill="#B7C2C9" stroke="#FFFFFF" stroke-width="5"/>
+      <circle cx="360" cy="304" r="20" fill="#B7C2C9" stroke="#FFFFFF" stroke-width="5"/>
+    </g>
+
+    <!-- 5 graded points ON the frontier (ordinal viridis ramp; grade 1 = deep purple, most extreme) -->
+    <g stroke="#FFFFFF" stroke-width="6">
+      <circle cx="131" cy="407" r="28" fill="#FDE725"/>
+      <circle cx="233" cy="321" r="28" fill="#5DC863"/>
+      <circle cx="333" cy="249" r="28" fill="#21908C"/>
+      <circle cx="426" cy="197" r="28" fill="#3B528B"/>
+      <circle cx="502" cy="170" r="28" fill="#440154"/>
+    </g>
+  </g>
+
+  <!-- wordmark -->
+  <text x="300" y="572" text-anchor="middle"
+        font-family="Helvetica, Arial, sans-serif" font-weight="700"
+        font-size="60" letter-spacing="1" fill="#1F6F8B">gradepath</text>
+
+  <!-- hex border drawn LAST -->
+  <polygon points="300,0 600,173.2 600,519.6 300,692.8 0,519.6 0,173.2"
+           fill="none" stroke="#1F6F8B" stroke-width="16" stroke-linejoin="round"/>
+</svg>

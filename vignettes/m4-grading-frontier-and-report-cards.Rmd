@@ -1,0 +1,430 @@
+---
+title: "M4: Grading, the frontier, and report cards"
+author: "JoonHo Lee"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+abstract: >
+  This vignette is the social-choice climax of the method track: how the pairwise
+  outranking matrix Pi that m3 hands forward becomes grades. gradepath solves a
+  Bayes-risk integer program that sorts the units into a small number of
+  contiguous grades, trading the discordance rate against the posterior Kendall
+  agreement through a single coarseness weight lambda. Sweeping lambda traces the
+  information-reliability frontier: fewer grades are coarser but more reliable,
+  more grades are finer but less reliable, and the published grading sits at the
+  baseline lambda = 0.25. The selected grading is assembled into a report card,
+  ranked from the most-extreme unit, with a conditional-discordance matrix that
+  certifies each between-grade cut. We derive the integer program, the frontier,
+  and the report card, citing KRW Propositions 1-3. The grade solve takes minutes,
+  so it is shown but never run here: every step is verified live against the
+  already-solved 97-firm parity fit.
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_caption: true
+    df_print: tibble
+vignette: >
+  %\VignetteIndexEntry{M4: Grading, the frontier, and report cards}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+{ p <- system.file("scripts/_setup.R", package = "gradepath"); if (!nzchar(p)) p <- "_setup.R"; source(p) }
+```
+
+This is the fourth method-track vignette and the social-choice climax of the
+pipeline. `r vlink("m3-deconvolution-and-posterior", "m3")` ended by deriving the
+one object the grading reads: the pairwise outranking matrix $\Pi = (\pi_{ij})$,
+whose entry $\pi_{ij} = \Pr(\theta_i > \theta_j \mid \text{data})$ is the
+posterior probability that unit $i$'s latent effect exceeds unit $j$'s. This
+vignette takes $\Pi$ and derives the three objects that finish the KRW pipeline:
+the **Bayes-risk grade integer program** that sorts the units into contiguous
+grades (§2-§3), the **information-reliability frontier** swept over the coarseness
+weight $\lambda$ (§4), and the **report card** with its conditional-discordance
+matrix (§5-§6). We summarize the theory from Kline, Rose & Walters
+[@kline2024discrimination] — stating, not reproving, their Propositions 1-3 (§7)
+— and follow each step with a verification panel checked live against the fit.
+
+We load that fit once, at the top. The grade integer program *solves*: it is a
+mixed-integer program that takes minutes at $n = 97$, so the verbs `gp_grade()`
+and `gp_grade_path()` appear only as `eval = FALSE` illustrations. Everything else
+is a fast read off the **already-solved** path stored on the fit, so **no integer
+program is solved anywhere in this document**.
+
+```{r load-fit}
+fit <- gp_parity_fit("race")   # the proven 97-firm RACE card, grades 2 / 81 / 14
+```
+
+This is the 97-firm RACE parity fit at the KRW baseline $\lambda = 0.25$, already
+solved across the $\lambda$ grid. Keep one fact from
+`r vlink("m1-foundations-and-notation", "m1")` in view: a grade is an **integer
+label** in $\{1, \dots, n\}$ — not a letter grade such as A or B — and exported
+grade 1 is the most-extreme block in $\theta$. A grade is a sorting by posterior
+evidence, never a contest.
+
+## 1. From the pairwise matrix to grades
+
+m3 handed us $\Pi$, a full $n \times n$ table of pairwise outranking
+probabilities. Why is that not already the answer? Because $\Pi$ orders every
+*pair* but not the *whole*. The naive rule — separate $i$ above $j$ whenever
+$\pi_{ij}$ clears a threshold — can disagree with itself: the evidence might
+decisively order $i$ above $k$ yet be too weak to order either against a middle
+unit $j$, leaving the pairwise rule to tie $i$ with $j$ and $j$ with $k$ while
+demanding $i$ above $k$. That is a cycle, the report-card analog of a Condorcet
+cycle in voting, and a grading cannot contain one.
+
+So the goal is precise: partition the $n$ units into a small number of
+**contiguous, ordered grades** so that the ordering respects the posterior where
+the evidence is strong, pools units the data cannot separate, and is cycle-free.
+Because the conflicts must be resolved *globally* rather than pair by pair, this
+is an optimization, not a thresholding pass. gradepath follows KRW
+[@kline2024discrimination] in casting it as a Bayes-risk integer program — the
+modern compound-decision view of ranking and selection [@gukoenker2023;
+@mogstad2024]. The arc below states the program (§2), extracts the grade from its
+solution (§3), sweeps $\lambda$ for the frontier (§4), assembles the report card
+(§5), decomposes its reliability boundary by boundary (§6), and places the result
+against KRW's optimality propositions (§7).
+
+## 2. The Bayes-risk integer program
+
+The grading is encoded by binary pairwise indicators. For each *ordered* pair
+$(i, j)$ with $i \neq j$, the variable $D_{ij} \in \{0, 1\}$ is set to $1$ exactly
+when the grading ranks $i$ above $j$ (so $i$ carries the more-extreme grade).
+Crucially, $D_{ij}$ and $D_{ji}$ are **independent** solver variables — the
+program does *not* hard-impose $D_{ij} + D_{ji} = 1$; antisymmetry and
+transitivity enter as linear constraints, which is exactly what lets two units
+*tie* when the evidence is weak.
+
+**The objective.** The solver minimizes a Bayes risk that is linear in the
+$D_{ij}$. For each ordered pair the per-pair contribution of separating $i$ above
+$j$ is
+
+$$
+\Pi_{ji} \;-\; \lambda\, \Pi_{ij}
+\qquad\bigl(\text{equivalently } P[j,i] - \lambda\,P[i,j]\bigr),
+$$
+
+summed over the ordered pairs the grading separates, where $\Pi = (\pi_{ij})$ is
+the pairwise matrix from m3. Read the two terms as a ledger. The first,
+$\Pi_{ji} = \pi_{ji}$, is the **discordance cost**: the posterior mass saying $j$
+is the more-extreme unit, charged against a grading that put $i$ above it. The
+second, $-\lambda\,\Pi_{ij} = -\lambda\,\pi_{ij}$, is the **information reward**,
+scaled by $\lambda$: the agreeing mass, credited for a separation the evidence
+supports. The optimizer is paid to order a pair the way the posterior does and
+penalized for the reverse; $\lambda$ is the exchange rate between the two.
+
+**The constraints.** Two families pin down the feasible set. *Antisymmetry*
+forbids ranking $i$ above $j$ and $j$ above $i$ at once; *transitivity* forbids
+cycles, so $i$ above $j$ and $j$ above $k$ force $i$ above $k$. gradepath encodes
+transitivity through an integer grade-label auxiliary (every unit gets a label,
+the binaries tied to the label gaps), making cycles infeasible by construction;
+the backend is the subject of `r vlink("a5-solvers-and-calibration", "a5")`. The
+one constraint a reader should carry is the **separation threshold**: two units
+may share a grade only when neither outranks the other decisively, i.e. when
+
+$$
+\max(\Pi_{ij},\, \Pi_{ji}) \;<\; \frac{1}{1+\lambda}.
+$$
+
+At the baseline $\lambda = 0.25$ the threshold is $1/1.25 = 0.80$: the stronger
+pairwise probability must fall below $0.80$ for two units to pool. Raise $\lambda$
+and the threshold drops toward $0.5$ (separate on the faintest majority); lower it
+and the threshold rises toward $1$ (pool unless near-certain). This inequality is
+the gear that turns $\lambda$ into a grade count.
+
+**The call (shown, not run).** The grading is produced by `gp_grade_path()`, which
+solves one integer program per $\lambda$ on the grid and records the reportable
+$\lambda$; `gp_grade()` is the one-shot for a single $\lambda$. Both *solve* and
+take minutes, so they are shown here only as illustrations:
+
+```{r grade-call, eval = FALSE}
+# Solve the full grading frontier from a pairwise object (the main verb).
+# This SOLVES one integer program per lambda and takes minutes -- not run here.
+path <- gp_grade_path(get_pairwise(fit),
+                      lambda_grid     = c(0.25, 0.50, 1.00),  # 0.25 must be present
+                      selected_lambda = 0.25)                 # the reportable weight
+
+# One-shot: solve a single lambda and return its fit.
+one  <- gp_grade(get_pairwise(fit), lambda = 0.25)
+```
+
+We never run these. The path on the bundled fit is already solved, and the solver
+returns the optimum exactly — status `"optimal"` at a Gurobi MIP gap of $0$ —
+which we read straight off the fit:
+
+```{r verify-optimal}
+fit$selected_grade$summary$status        # "optimal": the IP is solved to optimality
+fit$selected_grade$summary$grade_count   # the selected grading has 3 grades
+fit$selected_grade$summary$n_units       # over all 97 firms
+```
+
+The selected grading is solved to optimality (`status = `
+`r dQuote(fit$selected_grade$summary$status, q = FALSE)`), with
+`r fit$selected_grade$summary$grade_count` grades over all
+`r fit$selected_grade$summary$n_units` firms. Because the gap is $0$, this is the
+*proven* risk-minimizer at $\lambda = 0.25$, not an approximation. (Read the
+scalar objective from `fit$grade_path$summary$objective`, shown in §4 — *not* from
+`fit$selected_grade$objective`, which is a structured list rather than a number.)
+The optimality guarantees are KRW Propositions 1-3, stated in §7.
+
+## 3. Extracting the grade
+
+The integer-label auxiliary that enforced transitivity is **not** the reported
+grade. The grade is reconstructed from the optimal binaries by a win-count and a
+dense rank — the grade-direction triple fixed in
+`r vlink("m1-foundations-and-notation", "m1")`. First, for each unit sum the
+binaries to get its **win-count**,
+
+$$
+S_i \;=\; \sum_{j} D_{ij},
+$$
+
+the number of units $i$ is placed above (the code uses $D_{ij}$, not $D_{ji}$,
+because the two are independent). Second, the exported grade is the **descending
+dense rank** of the win-count,
+
+$$
+\text{grade}_i \;=\; \operatorname{dense\_rank}\!\big(S_i;\ \text{ascending}=\text{FALSE}\big),
+$$
+
+so the unit with the **largest** $S_i$ — placed above the most others, the
+**most-extreme $\theta$** — earns the smallest label, grade $\mathbf{1}$, and
+equal win-counts share a grade. The welfare reading of grade 1 *flips* between
+datasets: for firms it is the most-discriminatory firm, for names the
+best-treated name (the m1 firms-vs-names invariant). The machinery is identical;
+only the interpretation reverses — which is exactly why gradepath's output is
+result-first and quantity-anchored (the package decision `GP-DEC-14-A`).
+
+**Verification panel.** The internal $D_{ij}$ and $S_i$ are solver-internal, but
+the assembled card carries their *consequence*: grade 1 sits first, the
+largest-$S_i$ block at the top. `as.data.frame(fit)` lays the 97 firms out one per
+row in rank order:
+
+```{r verify-card-head}
+card <- as.data.frame(fit)
+dim(card)                       # 97 rows x 10 columns: one firm per row
+head(card, 6)                   # grade 1 first -- the dense-rank extraction
+```
+
+The card is `r nrow(as.data.frame(fit))` $\times$ `r ncol(as.data.frame(fit))` and
+its first rows carry grade `r head(as.data.frame(fit)$grade, 1)`, consistent with
+the descending dense-rank extraction placing the largest-$S_i$ block first. The directional consequence is
+also checkable numerically: if grade 1 is the most-extreme $\theta$, the mean
+posterior effect must be **largest** in grade 1 and decrease as the grade number
+rises. Group the card's `posterior_mean` by grade:
+
+```{r verify-direction}
+tapply(card$posterior_mean, card$grade, mean)   # decreasing across grades 1 -> 3
+```
+
+Grade 1 carries the highest mean posterior effect
+(`r round(tapply(as.data.frame(fit)$posterior_mean, as.data.frame(fit)$grade, mean)[["1"]], 3)`),
+falling to
+`r round(tapply(as.data.frame(fit)$posterior_mean, as.data.frame(fit)$grade, mean)[["2"]], 3)`
+in grade 2 and
+`r round(tapply(as.data.frame(fit)$posterior_mean, as.data.frame(fit)$grade, mean)[["3"]], 3)`
+in grade 3 — monotonically decreasing, the numeric confirmation that the
+dense-rank-of-win-count extraction places the most-extreme $\theta$ in grade 1.
+
+## 4. The information-reliability frontier
+
+A single $\lambda$ gives a single grading; sweeping $\lambda$ over a grid gives a
+*path* of gradings, and scoring each against the same $\Pi$ traces the
+**information-reliability frontier**. Each point is the risk-minimizer at its own
+$\lambda$, so the whole curve is the menu of defensible gradings. The two
+coordinates are the **reliability** $1 - \overline{\mathrm{DR}}$ on the horizontal
+axis — the posterior share of between-grade comparisons that agree with the
+posterior — and the posterior expected Kendall agreement $\bar\tau$ on the
+vertical — how much rank information the grading carries. By construction,
+
+$$
+\mathrm{Reliability} \;=\; 1 - \overline{\mathrm{DR}}.
+$$
+
+The trade-off is monotone, and it is the central finding. As $\lambda$ rises the
+optimizer separates more units, so the **grade count rises**, $\bar\tau$ rises
+(more information), the discordance rate rises, and reliability $1 -
+\overline{\mathrm{DR}}$ **falls**. Fewer grades are coarser but more reliable;
+more grades are finer but less reliable. There is no free lunch: every grade you
+add buys information at the cost of reliability. At $\lambda = 1$ the rule
+collapses to the Condorcet ordering, the finest the rule will return.
+
+**Verification panel.** The frontier table is `fit$grade_path$summary`, one row per
+$\lambda$. For the parity fit it has three rows; read off the monotone
+grade-count-up / reliability-down trade-off:
+
+```{r verify-frontier}
+fit$grade_path$summary[, c("lambda", "grade_count", "discordance_rate",
+                           "reliability", "tau_bar")]
+```
+
+Three rows tell the whole story. As $\lambda$ rises $0.25 \to 0.50 \to 1.00$, the
+grade count climbs `3 -> 6 -> 97`, the discordance rate rises
+`0.039 -> 0.161 -> 0.268`, reliability — its complement — *falls*
+`0.961 -> 0.839 -> 0.732`, and $\bar\tau$ rises `0.207 -> 0.428 -> 0.464`. The
+endpoint $\lambda = 1$ has shattered into
+`r fit$grade_path$summary$grade_count[fit$grade_path$summary$lambda == 1]`
+singleton grades — the Condorcet ordering — while the selected grading sits at the
+other end, $\lambda = 0.25$, with
+`r fit$grade_path$summary$grade_count[fit$grade_path$summary$lambda == 0.25]`
+grades. The objective at the selected $\lambda$ is the optimal Bayes risk in the
+program's coordinates:
+
+```{r verify-objective}
+fit$grade_path$summary$objective[fit$grade_path$summary$lambda == 0.25]
+```
+
+— about
+`r round(fit$grade_path$summary$objective[fit$grade_path$summary$lambda == 0.25], 1)`,
+the minimized risk of the selected grading (more negative is better, since the
+information reward enters with a minus sign), with every row reported `optimal`.
+
+**Figure.** `gp_frontier()` scores the already-solved path against $\Pi$ and
+`gp_plot_frontier()` draws the $(1 - \overline{\mathrm{DR}}, \bar\tau)$ curve (KRW
+Figure 6b) — a fast read, no solve. The two-row legend sits at the bottom, so give
+the figure a wide, short canvas:
+
+```{r fig-frontier, fig.width = 8, fig.height = 5.5, fig.cap = "The information-reliability frontier for the RACE fit (KRW Figure 6b): reliability (1 minus the discordance rate, horizontal) against the posterior expected agreement tau-bar (vertical), with the selected lambda = 0.25 grading marked. Walking the curve trades grade count against reliability.", fig.alt = "A scatter-and-line plot. The horizontal axis is reliability, one minus the discordance rate; the vertical axis is the posterior expected agreement tau-bar. A connected path of points traces the frontier from few grades at high reliability to many grades at lower reliability, with the selected grading highlighted and a two-row legend at the bottom."}
+fr <- gp_frontier(fit$grade_path, pairwise = get_pairwise(fit))
+gp_plot_frontier(fr)
+```
+
+Read the curve from right to left as a walk in $\lambda$. The right-most,
+most-reliable point is the coarse three-grade baseline; moving left adds grades,
+buying $\bar\tau$ at the cost of reliability. The highlighted point is the selected
+grading — a *small* number of grades capturing most of the achievable $\bar\tau$
+while holding the discordance rate near
+`r round(fit$grade_path$summary$discordance_rate[fit$grade_path$summary$lambda == 0.25], 3)`.
+
+## 5. The report card
+
+The report card translates the frontier's abstract trade-off into the policy
+artifact a regulator reads: a ranked list of units, each with its posterior
+interval and its selected grade. Its assembly is a join with **two keys**. The
+**sort key** is the Condorcet ($\lambda = 1$) order — the finest ranking, the
+most-extreme unit on top — so the rows read top-to-bottom as most-to-least
+extreme. The **display key** is the selected ($\lambda = 0.25$) grade — the small
+number of statistically defensible bands painted onto that fine ranking. One row
+order, one grade column, no recomputation.
+
+The assembled object is `get_report_card(fit)`, and its tidy form is
+`as.data.frame(fit)` — the `r ncol(as.data.frame(fit))`-column card seen in §3,
+carrying `id`, `label`, `grade`, `sort_rank`, `selected_lambda`, `posterior_mean`,
+the interval `lower`/`upper`, and the raw `estimate`/`se`. For the race fit, grade
+1 is the small most-discriminatory block, grade 3 the largest best-behaved block.
+
+**Figure.** `gp_plot_report_card()` draws the point-and-interval "caterpillar"
+(KRW Figure 7), one firm per row, the most-extreme on top, coloured by grade:
+
+```{r fig-report-card, fig.width = 7, fig.height = 8, fig.cap = "The RACE report card (KRW Figure 7): each of the 97 firms as its posterior White-minus-Black contact-rate gap (point) with its credible interval (horizontal line), one firm per row, ranked with the most-extreme on top and coloured by its integer grade in the 2 / 81 / 14 split.", fig.alt = "A horizontal caterpillar plot of 97 firms, one per row, ranked from most extreme at the top to least extreme at the bottom. Each row shows a point for the firm's posterior gap and a horizontal line for its credible interval. Points are coloured by grade into three groups, with the colour changing where the intervals stop overlapping."}
+gp_plot_report_card(get_report_card(fit))
+```
+
+Read it in three moves: vertical position is rank (top = most extreme), horizontal
+position is the shrunken posterior gap, and line length is uncertainty. The grade
+colours change exactly where the intervals stop overlapping — the bands are cut by
+the evidence, not at arbitrary points. The card is a *ranking* annotated with the
+bands the data can defend, never a verdict.
+
+## 6. Conditional discordance
+
+The headline discordance rate of §4 is an average, and an average can hide one
+unreliable boundary. The **conditional discordance matrix** decomposes it grade by
+grade. For an ordered pair of grades $(g, g')$ with $g$ the more extreme, the cell
+$\mathrm{DR}_{g,g'}$ is the share of the between-block posterior mass that is
+*misranked* — the probability that a unit drawn from grade $g$ is actually less
+extreme than one drawn from grade $g'$, conditional on the pair straddling that
+boundary. A small off-diagonal cell certifies that *that specific cut* is clean,
+and it reads as posterior odds: a discordance of $\mathrm{DR}_{g,g'} = 0.05$ leaves
+$1 - 0.05 = 0.95$ posterior mass on the correct ordering, i.e. $19{:}1$ posterior
+odds that the grade ordering is right.
+
+**Figure.** `gp_plot_discordance()` reads the same `fr` object and draws the
+lower-triangular matrix (KRW Figure 10a) — no solve:
+
+```{r fig-discordance, fig.width = 6, fig.height = 5, fig.cap = "The conditional discordance matrix for the RACE fit (KRW Figure 10a): a lower-triangular heatmap of the between-grade discordance rate for each pair of grades, the more-extreme grade on the columns (grade 1 at the left) and the less-extreme grade on the rows, each cell annotated with its rate. Small off-diagonal values mean clean cuts between grades.", fig.alt = "A lower-triangular heatmap with one cell per pair of grades. Columns run from the most-extreme grade on the left; rows run from the second grade at the top down. Each cell is shaded by its between-grade discordance rate, darker for higher discordance, with the numeric rate written inside; the off-diagonal cells are light, indicating clean separation."}
+gp_plot_discordance(fr)
+```
+
+The off-diagonal cells stay small: every between-grade cut in the three-grade
+baseline is reliable, and no single boundary carries a disproportionate share of
+the misranking. This is the granular complement to the headline scalar — the
+aggregate discordance rate of
+`r round(fit$grade_path$summary$discordance_rate[fit$grade_path$summary$lambda == 0.25], 3)`
+is spread evenly across the cuts, not concentrated in one fragile boundary.
+
+## 7. Propositions 1-3
+
+The Bayes-risk program is not an ad-hoc rule. KRW prove that its optimum inherits
+the axiomatic structure of well-studied voting rules, with the classical $0.5$
+majority threshold sharpened to $1/(1+\lambda)$. We **state** their Propositions
+1-3 and cite the paper [@kline2024discrimination]; the proofs are in their Online
+Appendix B and are not reproduced here. The three are a hierarchical guarantee — a
+dominant individual, a dominant set, the internal structure of that set:
+
+- **Proposition 1 ($\lambda$-Condorcet criterion).** If a unit $i$ satisfies
+  $\pi_{ij} > 1/(1+\lambda)$ for every other $j$, then $i$ receives a strictly
+  more-extreme grade than every other unit — equivalently the largest win-count
+  $S_i$, exported grade 1. At $\lambda = 1$ the threshold is the classical
+  Condorcet value $0.5$; at the baseline $\lambda = 0.25$ it is $0.80$. A
+  second-place analogue holds in turn: if a further unit $k$ satisfies
+  $\pi_{kj} > 1/(1+\lambda)$ for every remaining $j \neq i$, then $i$ receives a
+  more-extreme grade than $k$, which in turn receives a more-extreme grade than
+  all the remaining units — the criterion extends to the runner-up.
+- **Proposition 2 ($\lambda$-Smith criterion).** If a *set* $S$ satisfies
+  $\pi_{ij} > 1/(1+\lambda)$ for all $i \in S$ and $j \notin S$, then every unit
+  receiving the most-extreme grade lies in $S$. The grading respects dominant
+  coalitions, not just dominant individuals.
+- **Proposition 3 (unordered $\lambda$-Smith candidates).** Under Proposition 2,
+  if additionally $\pi_{ij} < 1/(1+\lambda)$ for all $i, j \in S$, then every unit
+  in $S$ receives the **same** grade: the set collectively separates from
+  outsiders, but the within-$S$ evidence is too weak to separate its members.
+
+Together these say the $\lambda$-optimal grading treats *ties as a first-class
+feature* rather than an edge case — exactly the honesty the report card needs, and
+the guarantee behind the `optimal` status verified in §2. The modern reading of
+ranking-and-selection as a compound decision [@gukoenker2023; @mogstad2024] places
+these results in the same lineage as the empirical-Bayes shrinkage of m3.
+
+## 8. Where to next
+
+With the integer program derived, the grade extracted, the frontier swept, and the
+report card and its discordance matrix assembled and verified live on the fit, the
+KRW pipeline is complete — the pairwise matrix of m3 has become a small number of
+honest grades. The next steps:
+
+- **Foundations and notation** — `r vlink("m1-foundations-and-notation", "m1")`
+  fixes the grade-direction triple ($S_i = \sum_j D_{ij}$, dense rank descending,
+  grade 1 = most-extreme $\theta$) and the $1/(1+\lambda)$ threshold this vignette
+  builds on.
+- **Precision and standardization** —
+  `r vlink("m2-precision-and-standardization", "m2")` derives the r-scale and the
+  $\beta$-GMM step upstream of the pairwise matrix.
+- **Deconvolution and posterior** —
+  `r vlink("m3-deconvolution-and-posterior", "m3")` builds the prior, the
+  posteriors, and the pairwise matrix $\Pi$ that this vignette's integer program
+  consumes.
+- **Two-level and calibration** —
+  `r vlink("m5-two-level-and-calibration", "m5")` extends the grading to the
+  two-level industry model and validates the pipeline by Monte Carlo.
+
+For the workflow side, `r vlink("a1-getting-started", "a1")` is the first contact,
+`r vlink("a2-the-grading-workflow", "a2")` runs the full grading stage hands-on
+with race and gender side by side,
+`r vlink("a3-reading-and-exporting-results", "a3")` covers the report-card and
+frontier accessors used above, `r vlink("a4-figures", "a4")` is the figure gallery
+the three plots come from, and
+`r vlink("a5-solvers-and-calibration", "a5")` covers the solver backends that run
+the integer program this vignette only shows. Throughout, the grade is a sorting
+by posterior evidence, never a contest: gradepath's printed output is result-first
+and quantity-anchored (the package decision `GP-DEC-14-A`), so the same code path
+serves firms and names without the printed text inverting on one of them.
+
+### Provenance
+
+```{r provenance}
+sessionInfo()
+```
+
+## References
