@@ -13,6 +13,7 @@ jobs:
     env:
       GRADEPATH_BACKEND: highs
       R_KEEP_PKG_SOURCE: yes
+      GITHUB_PAT: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
