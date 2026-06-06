@@ -14,6 +14,9 @@ jobs:
       GRADEPATH_BACKEND: highs
       R_KEEP_PKG_SOURCE: yes
       GITHUB_PAT: ${{ github.token }}
+      # gurobi (a Suggests) is commercial and not installable on CI; allow the
+      # check to proceed without all Suggests (their tests skip gracefully).
+      _R_CHECK_FORCE_SUGGESTS_: "false"
     steps:
       - uses: actions/checkout@v4
 
